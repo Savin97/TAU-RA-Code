@@ -1,9 +1,11 @@
 from pathlib import Path
 from config import OUTPUT_PATH, ROOT_PATH
-from analysis_functions import root_progression, load_tsv
+from analysis_functions import progression_stats, root_progression, load_tsv
+from visualization import plot_progression_heatmap
 
 def main():
     ROOT = Path(ROOT_PATH)
+    OUTPUT = Path(OUTPUT_PATH)
     repos = [
         "bach_en_fr_suites",
         "bach_solo",
@@ -21,8 +23,21 @@ def main():
 
     for score in reviewed_tsv_files:  
         df = load_tsv(score)
-        df.to_csv("output/df.csv", sep="\t", index=False)  # overwrite to ensure consistent format
-        #df_with_root_prog = root_progression(df)
+        df_with_root_prog = root_progression(df)
+        df_with_root_prog.to_csv(OUTPUT / f"{score.name}_with_root_prog", sep="\t", index=False)
+        total_counts, transition_counts, transition_probs = progression_stats(df_with_root_prog)
+
+        print("Total counts of progression types:")
+        print(total_counts.loc[["S", "A", "W"]])
+
+        print("\nTransition counts (current row -> next row):")
+        print(transition_counts)
+
+        print("\nTransition probabilities (row-normalized):")
+        print(transition_probs)
+
+        df_with_root_prog.to_csv(OUTPUT / score.name, sep="\t", index=False)
+        plot_progression_heatmap(transition_probs)
         break
 
 if __name__ == "__main__":

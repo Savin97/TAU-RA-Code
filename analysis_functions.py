@@ -51,14 +51,44 @@ def root_progression(df):
 
     # difference from previous row
     df["root_change"] = df["root"].diff()
-
     df["progression_strength"] = df["root_change"].apply(classify_root_movement)
-
     cols_to_keep = ["mc", "mn", "mc_onset", "mn_onset", "label", "chord", "root", "root_change", "progression_strength"]
-
     df = df[cols_to_keep]
 
     return df
+
+def progression_stats(df, categories=PROGRESSION_CATEGORIES):
+    """
+    Compute:
+      - total counts of each category
+      - how many times each category is followed by each category
+        (transition matrix)
+      - row-normalized transition probabilities
+
+    Returns (total_counts, transition_counts, transition_probs)
+    """
+    s = df["progression_strength"]
+
+    # Total counts of each symbol
+    total_counts = s.value_counts()
+
+    # Count transitions using crosstab: current vs next
+    shifted = s.shift(-1)
+    all_transitions = pd.crosstab(s, shifted)
+
+    # Keep only the categories of interest (S, A, W)
+    cats = list(categories)
+    transition_counts = all_transitions.loc[cats, cats].fillna(0).astype(int)
+
+    # Row-normalized probabilities P(next = j | current = i)
+    transition_probs = transition_counts.div(
+        transition_counts.sum(axis=1), axis=0
+    )
+
+    return total_counts, transition_counts, transition_probs
+
+
+
 
 
 # Statistics summary code (not currently used)
