@@ -6,3 +6,7 @@ debussy_suite_bergamasque/
 **/debussy_suite_bergamasque/
 mozart_piano_sonatas/
 **/mozart_piano_sonatas/
+__pycache__/
+**/__pycache__/
+output/
+.venv/
