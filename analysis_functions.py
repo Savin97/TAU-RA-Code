@@ -1,7 +1,6 @@
 # Helper functions
 import pandas as pd
 import numpy as np
-import re
 
 from config import PROGRESSION_CATEGORIES
 from visualization import plot_progression_heatmap
