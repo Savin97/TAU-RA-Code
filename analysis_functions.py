@@ -68,7 +68,6 @@ def prog_type_count(df, categories = PROGRESSION_CATEGORIES):
     # Count transitions using crosstab: current vs next
     shifted = prog_strength.shift(-1)
     all_transitions = pd.crosstab(prog_strength, shifted)
-
     # Keep only the categories of interest (S, A, W)
     cats = list(categories)
     transition_counts = all_transitions.loc[cats, cats].fillna(0).astype(int)
