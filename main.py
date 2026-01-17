@@ -1,6 +1,6 @@
 from pathlib import Path
 from config import  ROOT_PATH
-from analysis_functions import get_progression_probs
+from analysis_functions import build_piece_level_tables, get_progression_probs, aggregate_progression_distribution, aggregate_transition_unconditional
 
 def main():
     """
@@ -45,6 +45,22 @@ def main():
         "Chopin": chopin_tsv_files,
         "All": all_reviewed_tsv_files
     }
+
+    dist_df, trans_df = build_piece_level_tables(composer_dict)
+
+    # Per-piece tables (you can save to CSV)
+    dist_df.to_csv("piece_progression_percentages.csv", index=False)
+    trans_df.to_csv("piece_transition_uncond_percentages.csv", index=False)
+
+    # Composer-level summaries
+    composer_prog = aggregate_progression_distribution(dist_df)
+    composer_trans = aggregate_transition_unconditional(trans_df)
+
+    print("\n=== Composer progression_strength % (piece-equal weighting) ===")
+    print(composer_prog)
+
+    print("\n=== Composer transition % (piece-equal weighting) ===")
+    print(composer_trans)
 
     for composer, tsv_files in composer_dict.items():
         print(f"Processing composer: {composer} with {len(tsv_files)} scores...")
