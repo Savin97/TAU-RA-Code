@@ -11,6 +11,79 @@ def load_tsv(score):
     # return pd.read_csv(f"{score}_reviewed.tsv", sep="\t")
     return pd.read_csv(score, sep="\t")
 
+
+def _counts_from_tsv(tsv_path: Path, labels=PROGRESSION_CATEGORIES) -> pd.Series:
+    """
+    Shared core: returns raw counts of progression_strength labels for ONE TSV.
+    """
+    df = load_tsv(tsv_path)
+    dfp = root_progression(df)
+
+    counts = (
+        dfp["progression_strength"]
+        .value_counts()
+        .reindex(labels, fill_value=0)
+        .astype(int)
+    )
+    counts.name = tsv_path.stem
+    return counts
+
+
+def _counts_to_percents(counts: pd.Series) -> pd.Series:
+    """
+    Shared core: converts counts -> percents (0..1). Safe for total=0.
+    """
+    total = int(counts.sum())
+    if total == 0:
+        return counts.astype(float)
+    return counts / total
+
+
+def build_piece_counts_table(composer_dict: dict, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+    """
+    Returns ONE table: raw counts per piece.
+    rows: pieces
+    cols: composer, piece, n, A,S,W
+    """
+    rows = []
+    for composer, files in composer_dict.items():
+        for p in files:
+            p = Path(p)
+            counts = _counts_from_tsv(p, labels=labels)
+            row = {"composer": composer, "piece": p.stem, "n": int(counts.sum()), **counts.to_dict()}
+            rows.append(row)
+
+    df = pd.DataFrame(rows)
+    # stable column order
+    return df[["composer", "piece", "n"] + list(labels)]
+
+
+def piece_percentages_from_counts(piece_counts_df: pd.DataFrame, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+    """
+        Derive piece-level percentages from piece-level counts (no recompute).
+    """
+    out = piece_counts_df.copy()
+    denom = out["n"].replace(0, pd.NA)
+    for lab in labels:
+        out[lab] = (out[lab] / denom).fillna(0.0)
+    return out
+
+
+def composer_percentages_from_piece_counts(piece_counts_df: pd.DataFrame, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+    """
+        Weighted composer-level percentages:
+        sum counts across pieces -> normalize.
+    """
+    summed = piece_counts_df.groupby("composer")[["n"] + list(labels)].sum()
+
+    denom = summed["n"].replace(0, pd.NA)
+    pct = summed.copy()
+    for lab in labels:
+        pct[lab] = (summed[lab] / denom).fillna(0.0)
+
+    # keep n so you know how much data each composer had
+    return pct[["n"] + list(labels)]
+
 def classify_root_movement(diff):
     """
         Gets difference in root between current and previous chord.
@@ -79,8 +152,8 @@ def prog_type_count(df, categories = PROGRESSION_CATEGORIES):
 
 def piece_progression_distribution(score_path, labels=PROGRESSION_CATEGORIES) -> pd.Series:
     """
-    Returns a Series with percentages of each progression_strength label for ONE piece.
-    Index = labels, values = percentages (0..1).
+        Returns a Series with percentages of each progression_strength label for ONE piece.
+        Index = labels, values = percentages (0..1).
     """
     df = load_tsv(score_path)
     dfp = root_progression(df)
@@ -231,8 +304,7 @@ def build_piece_level_tables(composer_dict: dict) -> tuple[pd.DataFrame, pd.Data
 def aggregate_progression_distribution(dist_df: pd.DataFrame) -> pd.DataFrame:
     """
     Takes dist_df (piece-level percentages) and produces composer-level percentages.
-    IMPORTANT: averaging percentages weights pieces equally. If you want weighting by number of chords,
-    store raw counts instead. See note below.
+    IMPORTANT: averaging percentages weights pieces equally. 
     """
     label_cols = [c for c in PROGRESSION_CATEGORIES if c in dist_df.columns]
     agg = dist_df.groupby("composer")[label_cols].mean()  # equal weight per piece

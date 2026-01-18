@@ -31,3 +31,31 @@ def plot_progression_heatmap(composer, transition_probs, categories=PROGRESSION_
     fig.colorbar(im, ax=ax)
     plt.tight_layout()
     plt.savefig(f"{OUTPUT_PATH}/{composer}.png")
+
+
+# def composer_progression_percentage_heatmap(df_plot, label_cols= PROGRESSION_CATEGORIES):
+#     # Heatmap (composers x labels) with annotations
+#     data = df_plot[label_cols].to_numpy()
+#     composers = df_plot["composer"].tolist()
+
+#     fig, ax = plt.subplots(figsize=(6.8, 4.6))
+#     im = ax.imshow(data, aspect="auto")
+
+#     ax.set_xticks(np.arange(len(label_cols)))
+#     ax.set_xticklabels(label_cols)
+#     ax.set_yticks(np.arange(len(composers)))
+#     ax.set_yticklabels(composers)
+
+#     ax.set_title("Progression label shares (heatmap)")
+#     cbar = fig.colorbar(im, ax=ax)
+#     cbar.set_label("Share (0..1)")
+
+#     # annotate each cell
+#     for i in range(data.shape[0]):
+#         for j in range(data.shape[1]):
+#             ax.text(j, i, f"{data[i, j]*100:.1f}%", ha="center", va="center", fontsize=9)
+
+#     plt.tight_layout()
+
+#     out2 = Path("output/composer_progression_heatmap.png")
+#     fig.savefig(out2, dpi=200)

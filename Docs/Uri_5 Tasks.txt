@@ -1,0 +1,4 @@
+1. Get percentages of S,A,W from each piece (Unigram).
+2. Compare percentages
+3. Add a function that removes progressions that are pendulums - things like 1-V-1 -  goes back to the same root.
+4. Check different splits of harmonic progressions

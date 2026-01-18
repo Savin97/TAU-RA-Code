@@ -6,6 +6,10 @@ debussy_suite_bergamasque/
 **/debussy_suite_bergamasque/
 mozart_piano_sonatas/
 **/mozart_piano_sonatas/
+ABC/
+**ABC/
+liszt_pelerinage/
+**liszt_pelerinage/
 __pycache__/
 **/__pycache__/
 /__pycache__/

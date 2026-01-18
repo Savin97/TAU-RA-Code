@@ -1,0 +1,6 @@
+0. Add a function that removes progressions that are pendulums - things like 1-V-1 -  goes back to the same root.
+1. Make a matrix of every root progression, to every other - should turn out 20x20. Use Uri's Diatonic, chromatic root progression groupings (Sdia, WAdia, etc)
+2. Make a unigram for Dia,Chr groups. Then make a 2x2 matrix and heatmap of them.
+3. Make a unigram and heatmap for Root progressions by Interval type (S5,S3,W4,etc) !IF THERES TIME!.
+4. Take mc, mc_onset, label, root columns from reviewed files, add  progression_strength column.
+Move I progressions into a separate column so that they'll stand out to an observer. 
