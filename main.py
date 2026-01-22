@@ -1,5 +1,5 @@
 from pathlib import Path
-from config import  ROOT_PATH
+from config import  ROOT_PATH, ROOT_DIFF_VALUES, FINE_PROGRESSION_LABELS
 from analysis_functions import (
     get_progression_probs,
     build_piece_counts_table,
@@ -7,7 +7,10 @@ from analysis_functions import (
     piece_percentages_from_counts,
     composer_percentages_from_piece_counts,
     aggregate_progression_distribution,
-    aggregate_transition_unconditional  
+    aggregate_transition_unconditional,
+    get_root_change_matrices,
+    get_fine_progression_matrices
+
 )
 #from visualization import composer_progression_percentage_heatmap
 
@@ -77,6 +80,9 @@ def main():
     for composer, tsv_files in composer_dict.items():
         print(f"Processing composer: {composer} with {len(tsv_files)} scores...")
         get_progression_probs(composer, tsv_files)
+        # New: 21x21 root-change transition matrices
+        get_root_change_matrices(composer, tsv_files)
+        get_fine_progression_matrices(composer, tsv_files)
 
 
     piece_counts = build_piece_counts_table(composer_dict)
