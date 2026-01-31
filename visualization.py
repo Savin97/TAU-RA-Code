@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from config import PROGRESSION_CATEGORIES, OUTPUT_PATH, ROOT_DIFF_VALUES
+from config import SIMPLE_PROGRESSION_CATEGORIES, OUTPUT_PATH, ROOT_DIFF_VALUES
 
 OUTPUT = Path(OUTPUT_PATH)
 

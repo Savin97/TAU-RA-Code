@@ -1,19 +1,30 @@
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
-from config import ROOT_PATH
+from config import ROOT_PATH, SIMPLE_PROGRESSION_CATEGORIES
+from utilities import load_tsv
+from my_functions import (add_root_diff,
+                        add_root_progression_type_simple,
+                        add_root_progression_type_fine,
+                        build_progression_count_per_piece,
+                        composer_percentages_from_piece_counts,
+                        piece_percentages_from_counts)
 
 def myself():
+    """
+        1. Get tsv files in a list of paths.
+        2. Run a loop for each composer and create a DF for each composer.
+        3. On these DFs, perform the analysis, create features.
+    """
     ROOT = Path(ROOT_PATH)
     repos = [
         "bach_en_fr_suites",
         "bach_solo",
-        "beethoven_piano_sonatas",
-        "ABC",
-        "chopin_mazurkas",
-        "mozart_piano_sonatas",
-        "liszt_pelerinage"
+        # "beethoven_piano_sonatas",
+        # "ABC",
+        # "chopin_mazurkas",
+        # "mozart_piano_sonatas",
+        # "liszt_pelerinage"
     ]
 
     all_reviewed_tsv_files = []
@@ -46,45 +57,52 @@ def myself():
     # Dict with composer name and their corresponding tsv files list
     composer_dict = {
         "Bach": bach_tsv_files,
-        "Mozart": mozart_tsv_files,
-        "Beethoven": beethoven_tsv_files,
-        "Chopin": chopin_tsv_files,
-        "Liszt": liszt_tsv_files,
-        "All": all_reviewed_tsv_files
+        # "Mozart": mozart_tsv_files,
+        # "Beethoven": beethoven_tsv_files,
+        # "Chopin": chopin_tsv_files,
+        # "Liszt": liszt_tsv_files,
+        # "All": all_reviewed_tsv_files
     }
 
+    for composer, tsv_files in composer_dict.items():
+        print(f"Processing composer: {composer} with {len(tsv_files)} scores...")
+        progression_count_per_piece_per_composer = []
+        for tsv in tsv_files:
+            path = Path(tsv)
+            
+            df = load_tsv(path)
+            df = add_root_diff(df)
+            df = add_root_progression_type_simple(df)
+            df = add_root_progression_type_fine(df)
+            prog_count = 
 
-def classify_movement_SAWI(diff):
-    """
-        Gets a diff between two rows in the root column.
-        Returns a classification of the diff.
-    """
-    artificial = {-2, 2, -5, 5, 9, -9}
-    strong = {-1, -4, 6, 3, -8, 10}
-    weak = {1, 4, -6, -3, 8, -10}
-    identical = {0, -0, 7, -7}
+            progression_count_per_piece = build_progression_count_per_piece(path, df, composer, progression_count_per_piece_per_composer)
+            progression_count_per_piece_per_composer.append(progression_count_per_piece)
 
-    if pd.isna(diff):
-        return np.nan
+        prog_count_per_piece = pd.DataFrame(progression_count_per_piece_per_composer)
+        # stable column order
+        prog_count_per_piece = prog_count_per_piece[["composer", "piece", "n"] + list(SIMPLE_PROGRESSION_CATEGORIES) ]
+        piece_level_prog_percentages = piece_percentages_from_counts(prog_count_per_piece)
+        prog_count_per_composer = composer_percentages_from_piece_counts(prog_count_per_piece)
 
-    diff = int(diff)
 
-    if diff in identical:
-        return "I"
-    elif diff in artificial:
-        return "A"
-    elif diff in strong:
-        return "S"
-    elif diff in weak:
-        return "W"
-    else:
-        return "!"
+        # Output to .csv
+        prog_count_per_piece.to_csv(f"output/csv/{composer}_piece_counts.csv",index=False)
+        piece_level_prog_percentages.to_csv(f"output/csv/{composer}_piece_prog_percentages.csv",index=False)    
+        prog_count_per_composer.to_csv(f"output/csv/{composer}_prog_count_per_composer.csv",index=False)    
+
+    prog_count_all_composers = df
+
+    print("\n--------------------")
+    print("Execution Complete.")
+
+    # get_progression_probs(composer, tsv_files)
+    # # New: 21x21 root-change transition matrices
+    # get_root_change_matrices(composer, tsv_files)
+    # get_fine_progression_matrices(composer, tsv_files)
+
     
-def classify_movement_
 
-def add_root_diff(df):
-    df["root_diff"] = df["root"].diff()
-    df["progression_type"] = df["root_diff"].apply(classify_movement_SAWI)
 
 
 

@@ -1,5 +1,5 @@
 ALL_PROG_LABELS = ("S", "A", "W", "I", "!")
-PROGRESSION_CATEGORIES = ("S", "A", "W")
+SIMPLE_PROGRESSION_CATEGORIES = ("S", "A", "W","I")
 OUTPUT_PATH = "output"
 ROOT_PATH = "."   # point this to the folder containing the 4 repos
 ROOT_DIFF_VALUES = tuple(range(-10, 0)) + tuple(range(1, 11))

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-from config import (PROGRESSION_CATEGORIES, 
+from config import (SIMPLE_PROGRESSION_CATEGORIES, 
                     ALL_PROG_LABELS, 
                     FINE_PROGRESSION_MAP, 
                     FINE_PROGRESSION_LABELS,
@@ -15,10 +15,9 @@ def load_tsv(score):
     # return pd.read_csv(f"{score}_reviewed.tsv", sep="\t")
     return pd.read_csv(score, sep="\t")
 
-
-def _counts_from_tsv(tsv_path: Path, labels=PROGRESSION_CATEGORIES) -> pd.Series:
+def _counts_from_tsv(tsv_path: Path, labels = SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
     """
-    Shared core: returns raw counts of progression_strength labels for ONE TSV.
+        Shared core: returns raw counts of progression_strength labels for ONE TSV.
     """
     df = load_tsv(tsv_path)
     dfp = root_progression(df)
@@ -65,7 +64,7 @@ def classify_root_movement_classic(diff):
     else:
         return "!"
 
-def build_piece_counts_table(composer_dict: dict, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+def build_piece_counts_table(composer_dict: dict, labels=SIMPLE_PROGRESSION_CATEGORIES):
     """
     Returns ONE table: raw counts per piece.
     rows: pieces
@@ -84,7 +83,7 @@ def build_piece_counts_table(composer_dict: dict, labels=PROGRESSION_CATEGORIES)
     return df[["composer", "piece", "n"] + list(labels)]
 
 
-def piece_percentages_from_counts(piece_counts_df: pd.DataFrame, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+def piece_percentages_from_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES):
     """
         Derive piece-level percentages from piece-level counts (no recompute).
     """
@@ -95,7 +94,7 @@ def piece_percentages_from_counts(piece_counts_df: pd.DataFrame, labels=PROGRESS
     return out
 
 
-def composer_percentages_from_piece_counts(piece_counts_df: pd.DataFrame, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
+def composer_percentages_from_piece_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES):
     """
         Weighted composer-level percentages:
         sum counts across pieces -> normalize.
@@ -152,15 +151,10 @@ def root_progression(df):
 
     # new categorization
     df["progression_fine"] = df["root_change"].apply(classify_root_movement_classic_fine)
-    
-    cols_to_keep = [
-        "mc", "mn", "mc_onset", "mn_onset", "label", "chord", "root",
-        "root_change", "progression_strength", "progression_fine"
-    ]
 
     return df
 
-def prog_type_count(df, categories = PROGRESSION_CATEGORIES):
+def prog_type_count(df, categories = SIMPLE_PROGRESSION_CATEGORIES):
     """
         Compute total counts of each category
     """
@@ -181,28 +175,10 @@ def prog_type_count(df, categories = PROGRESSION_CATEGORIES):
     )
     return total_counts, transition_counts
 
-def piece_progression_distribution(score_path, labels=PROGRESSION_CATEGORIES) -> pd.Series:
-    """
-        Returns a Series with percentages of each progression_strength label for ONE piece.
-        Index = labels, values = percentages (0..1).
-    """
-    df = load_tsv(score_path)
-    dfp = root_progression(df)
-
-    s = dfp["progression_strength"].dropna()
-
-    counts = s.value_counts()
-    # ensure all labels exist
-    counts = counts.reindex(labels, fill_value=0)
-
-    total = counts.sum()
-    if total == 0:
-        return pd.Series({lab: 0.0 for lab in labels}, name=str(score_path))
-
-    return (counts / total).rename(str(score_path))
 
 
-def progression_probs(df, categories=PROGRESSION_CATEGORIES):
+
+def progression_probs(df, categories=SIMPLE_PROGRESSION_CATEGORIES):
     """
         Compute:
         - total counts of each category using prog_type_count
@@ -222,7 +198,7 @@ def progression_probs(df, categories=PROGRESSION_CATEGORIES):
     return transition_probs
 
 def get_progression_probs(composer, reviewed_tsv_files):
-    cats = list(PROGRESSION_CATEGORIES)
+    cats = list(SIMPLE_PROGRESSION_CATEGORIES)
     # Initialize global transition counts dataframe 
     global_transition_counts = pd.DataFrame(0, index=cats, columns=cats, dtype=int)
 
@@ -244,15 +220,14 @@ def get_progression_probs(composer, reviewed_tsv_files):
     uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
 
     # Save / plot both
-    plot_progression_heatmap(f"{composer}_COND", cond_probs,categories=PROGRESSION_CATEGORIES)
-    plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs,categories=PROGRESSION_CATEGORIES)
+    plot_progression_heatmap(f"{composer}_COND", cond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
+    plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
 
 
-
-def piece_progression_distribution(score_path, labels=PROGRESSION_CATEGORIES) -> pd.Series:
+def piece_progression_distribution(score_path, labels=SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
     """
-    Returns a Series with percentages of each progression_strength label for ONE piece.
-    Index = labels, values = percentages (0..1).
+        Returns a Series with percentages of each progression_strength label for ONE piece.
+        Index = labels, values = percentages (0..1).
     """
     df = load_tsv(score_path)
     dfp = root_progression(df)
@@ -270,7 +245,7 @@ def piece_progression_distribution(score_path, labels=PROGRESSION_CATEGORIES) ->
     return (counts / total).rename(str(score_path))
 
 
-def piece_transition_unconditional(score_path, categories=PROGRESSION_CATEGORIES) -> pd.Series:
+def piece_transition_unconditional(score_path, categories=SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
     """
     Returns unconditional transition percentages for ONE piece over the selected categories.
     Output is a flattened Series with index like 'S->A', 'A->W', etc.
@@ -337,7 +312,7 @@ def aggregate_progression_distribution(dist_df: pd.DataFrame) -> pd.DataFrame:
     Takes dist_df (piece-level percentages) and produces composer-level percentages.
     IMPORTANT: averaging percentages weights pieces equally. 
     """
-    label_cols = [c for c in PROGRESSION_CATEGORIES if c in dist_df.columns]
+    label_cols = [c for c in SIMPLE_PROGRESSION_CATEGORIES if c in dist_df.columns]
     agg = dist_df.groupby("composer")[label_cols].mean()  # equal weight per piece
     return agg
 
