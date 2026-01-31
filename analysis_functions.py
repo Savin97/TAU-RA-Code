@@ -32,6 +32,39 @@ def _counts_from_tsv(tsv_path: Path, labels=PROGRESSION_CATEGORIES) -> pd.Series
     counts.name = tsv_path.stem
     return counts
 
+def classify_root_movement_classic(diff):
+    """
+    Coarse classification used throughout the existing codebase.
+
+    Gets difference in root between current and previous chord.
+    Returns progression as:
+      - "A" (Artificial)
+      - "S" (Strong)
+      - "W" (Weak)
+      - "I" (Identical / no movement)
+      - "!" (unexpected / invalid)
+    """
+    artificial = {-2, 2, -5, 5, 9, -9}
+    strong = {-1, -4, 6, 3, -8, 10}
+    weak = {1, 4, -6, -3, 8, -10}
+    identical = {0, -0, 7, -7}
+
+    if pd.isna(diff):
+        return np.nan
+
+    diff = int(diff)
+
+    if diff in identical:
+        return "I"
+    elif diff in artificial:
+        return "A"
+    elif diff in strong:
+        return "S"
+    elif diff in weak:
+        return "W"
+    else:
+        return "!"
+
 def build_piece_counts_table(composer_dict: dict, labels=PROGRESSION_CATEGORIES) -> pd.DataFrame:
     """
     Returns ONE table: raw counts per piece.
@@ -76,40 +109,6 @@ def composer_percentages_from_piece_counts(piece_counts_df: pd.DataFrame, labels
 
     # keep n so you know how much data each composer had
     return pct[["n"] + list(labels)]
-
-
-def classify_root_movement_classic(diff):
-    """
-    Coarse classification used throughout the existing codebase.
-
-    Gets difference in root between current and previous chord.
-    Returns progression as:
-      - "A" (Artificial)
-      - "S" (Strong)
-      - "W" (Weak)
-      - "I" (Identical / no movement)
-      - "!" (unexpected / invalid)
-    """
-    artificial = {-2, 2, -5, 5, 9, -9}
-    strong = {-1, -4, 6, 3, -8, 10}
-    weak = {1, 4, -6, -3, 8, -10}
-    identical = {0, -0, 7, -7}
-
-    if pd.isna(diff):
-        return np.nan
-
-    diff = int(diff)
-
-    if diff in identical:
-        return "I"
-    elif diff in artificial:
-        return "A"
-    elif diff in strong:
-        return "S"
-    elif diff in weak:
-        return "W"
-    else:
-        return "!"
 
 
 def classify_root_movement_classic_fine(diff):
@@ -367,7 +366,7 @@ def root_change_transition_counts(dfp: pd.DataFrame, diffs=ROOT_DIFF_VALUES) -> 
     By default it returns a 21x21 matrix over {-10..-1, 1..10} (excludes 0).
     """
     s = dfp["root_change"].dropna().astype(int)
-
+    
     # keep only the diffs we want (default excludes 0)
     s = s[s.isin(diffs)]
 
