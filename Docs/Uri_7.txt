@@ -1,0 +1,9 @@
+0. Introduce I back into analyses.
+1. How long each root lasts for? Timestamps, give weight to every progression in accordance to how long the previous progression lasted and the next progression.
+Look at the dur columns in the reviewed files. 
+Build column 'Weight' (n,n+1) = dur(n) + dur(n+1).
+Down the line, heatmaps will take weighted progressions: Weight * progression.
+
+2. Keep only Unconditional outputs, but dont delete COND code, just comment it out.
+3. Under Backup.27.1.26 - Make a backup of main.py as it is now, along with outputs under the pilot folder. save the outputs with I, the ones that Uri asked to remove
+4. Outputs should be both 20x20, and (S,A,W,I)
