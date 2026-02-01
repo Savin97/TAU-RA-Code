@@ -8,7 +8,11 @@ from my_functions import (add_root_diff,
                         add_root_progression_type_fine,
                         build_progression_count_per_piece,
                         composer_percentages_from_piece_counts,
-                        piece_percentages_from_counts)
+                        piece_percentages_from_counts,
+                        count_prog_type_per_composer,
+                        row_normalized_progression_probs)
+
+from visualization import plot_progression_heatmap
 
 def myself():
     """
@@ -67,23 +71,60 @@ def myself():
     for composer, tsv_files in composer_dict.items():
         print(f"Processing composer: {composer} with {len(tsv_files)} scores...")
         progression_count_per_piece_per_composer = []
+        piece_dfs=[]
+        global_transition_counts = pd.DataFrame(0, 
+                                                index=list(SIMPLE_PROGRESSION_CATEGORIES), 
+                                                columns=list(SIMPLE_PROGRESSION_CATEGORIES), 
+                                                dtype=int)
+
         for tsv in tsv_files:
+            # Loop through each score's reviewed tsv file
+            # Add root difference
+            # Add root progression types
+            # and accumulate transition counts from all scores
             path = Path(tsv)
             
             df = load_tsv(path)
             df = add_root_diff(df)
             df = add_root_progression_type_simple(df)
             df = add_root_progression_type_fine(df)
-            prog_count = 
 
-            progression_count_per_piece = build_progression_count_per_piece(path, df, composer, progression_count_per_piece_per_composer)
+            progression_count_per_piece = build_progression_count_per_piece(path, df, composer)
             progression_count_per_piece_per_composer.append(progression_count_per_piece)
 
+            global_transition_counts += row_normalized_progression_probs(df)
+            piece_dfs.append(df)
+        
+        composer_df = pd.DataFrame()
+        for piece in piece_dfs:
+            composer_df = pd.concat([composer_df,piece], ignore_index=True)
+
+        transition_counts_per_composer = count_prog_type_per_composer(composer_df)
+        print(transition_counts_per_composer)
+        
         prog_count_per_piece = pd.DataFrame(progression_count_per_piece_per_composer)
         # stable column order
         prog_count_per_piece = prog_count_per_piece[["composer", "piece", "n"] + list(SIMPLE_PROGRESSION_CATEGORIES) ]
         piece_level_prog_percentages = piece_percentages_from_counts(prog_count_per_piece)
         prog_count_per_composer = composer_percentages_from_piece_counts(prog_count_per_piece)
+
+        # Might be unused:row_normalized_progression_probs(composer, tsv_files)
+
+        # Conditional Probabilities - rows sum to 1
+        cond_probs = global_transition_counts.div(
+            global_transition_counts.sum(axis=1), axis=0
+        ).fillna(0.0)
+
+        
+        # Unconditional Probabilities - sums to 1 over all cells
+        total_transitions = global_transition_counts.to_numpy().sum()
+        uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
+
+        # Save / plot both
+        plot_progression_heatmap(f"{composer}_COND", cond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES)
+        plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES)
+
+
 
 
         # Output to .csv

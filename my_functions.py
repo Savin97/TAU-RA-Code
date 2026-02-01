@@ -18,7 +18,7 @@ def add_root_progression_type_fine(df):
 
 def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
     """
-        Returns raw counts of progression_strength labels for ONE TSV.
+        Returns raw counts of progression_type labels for ONE TSV.
     """
     if labels == SIMPLE_PROGRESSION_CATEGORIES:
         counts = (
@@ -34,12 +34,12 @@ def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_C
             .reindex(labels, fill_value=0)
             .astype(int)
         )
-    counts.name = tsv_path.stem
+    if tsv_path != None:
+        counts.name = tsv_path.stem
     return counts
 
 
-
-def build_progression_count_per_piece( tsv_path: Path, df, composer, pieces_list: list):
+def build_progression_count_per_piece( tsv_path: Path, df, composer):
         """
             Returns 1 table: raw counts per piece.
             rows: pieces
@@ -76,18 +76,23 @@ def composer_percentages_from_piece_counts(piece_counts_df, labels=SIMPLE_PROGRE
     return pct[["n"] + list(labels)]
 
 
-def prog_type_count(df, categories = SIMPLE_PROGRESSION_CATEGORIES):
+def count_prog_type_per_composer(df, categories = SIMPLE_PROGRESSION_CATEGORIES):
     """
         Compute total counts of each category
+        returns a table like:
+        progression_type_simple     S     A     W     I
+        progression_type_simple
+        S                        3739  1685  1058  1510
+        A                        1597  1422   531   810
+        W                        1005   653   135   347
+        I                        1709   578   380   777
     """
-    prog_strength = df["progression_strength"]
-
-    # Total counts of each progression_strength
-    total_counts = progression_type_count_per_piece("_", df)
+    prog_strength = df["progression_type_simple"]
 
     # Count transitions using crosstab: current vs next
     shifted = prog_strength.shift(-1)
     all_transitions = pd.crosstab(prog_strength, shifted)
+
     # Keep only the categories of interest (S, A, W)
     cats = list(categories)
     transition_counts = (
@@ -95,7 +100,54 @@ def prog_type_count(df, categories = SIMPLE_PROGRESSION_CATEGORIES):
         .reindex(index=cats, columns=cats, fill_value=0)
         .astype(int)
     )
-    return total_counts, transition_counts
+    return transition_counts
+
+
+def row_normalized_progression_probs(df, categories=SIMPLE_PROGRESSION_CATEGORIES):
+    """
+        Compute:
+        - total counts of each category using count_prog_type_per_composer
+        - how many times each category is followed by each category
+            (transition matrix)
+        - row-normalized transition probabilities
+
+        Returns (total_counts, transition_counts, transition_probs)
+    """
+    transition_counts = count_prog_type_per_composer(df, SIMPLE_PROGRESSION_CATEGORIES)
+
+    # Row-normalized probabilities
+    transition_probs = transition_counts.div(
+        transition_counts.sum(axis=1), axis=0
+    )
+
+    return transition_probs
+
+
+def get_progression_probs(composer, reviewed_tsv_files):
+    cats = list(SIMPLE_PROGRESSION_CATEGORIES)
+    # Initialize global transition counts dataframe 
+    global_transition_counts = pd.DataFrame(0, index=cats, columns=cats, dtype=int)
+
+    # for score in reviewed_tsv_files:
+    #     # Loop through each score's reviewed tsv file
+    #     # and accumulate transition counts from all scores
+    #     df = load_tsv(score)
+    #     df_with_root_prog = root_progression(df)
+    #     _, transition_counts = prog_type_count(df_with_root_prog)
+    #     global_transition_counts += transition_counts
+
+    # # 1) Conditional: (rows sum to 1)
+    # cond_probs = global_transition_counts.div(
+    #     global_transition_counts.sum(axis=1), axis=0
+    # ).fillna(0.0)
+
+    # # 2) Unconditional:  (sums to 1 over all cells)
+    # total_transitions = global_transition_counts.to_numpy().sum()
+    # uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
+
+    # # Save / plot both
+    # plot_progression_heatmap(f"{composer}_COND", cond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
+    # plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
 
 
 

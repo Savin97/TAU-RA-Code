@@ -51,7 +51,7 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
 
     cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
     plt.tight_layout()
-    plt.savefig(f"{OUTPUT_PATH}/img/{composer}.png")
+    plt.savefig(f"{OUTPUT_PATH}/{composer}.png")
     plt.close()
 
 
