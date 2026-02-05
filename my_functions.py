@@ -3,6 +3,8 @@ from pathlib import Path
 
 from config import SIMPLE_PROGRESSION_CATEGORIES
 
+from utilities import load_tsv
+
 from classifying_functions import classify_movement_SAWI, classify_movement_fine
 def add_root_diff(df):
     df["root_diff"] = df["root"].diff()
@@ -122,32 +124,16 @@ def row_normalized_progression_probs(df, categories=SIMPLE_PROGRESSION_CATEGORIE
 
     return transition_probs
 
+def get_cond_probs(global_transition_counts):
+    # Conditional Probabilities - rows sum to 1
+    cond_probs = global_transition_counts.div(
+        global_transition_counts.sum(axis=1), axis=0
+    ).fillna(0.0)
+    return cond_probs
 
-def get_progression_probs(composer, reviewed_tsv_files):
-    cats = list(SIMPLE_PROGRESSION_CATEGORIES)
-    # Initialize global transition counts dataframe 
-    global_transition_counts = pd.DataFrame(0, index=cats, columns=cats, dtype=int)
-
-    # for score in reviewed_tsv_files:
-    #     # Loop through each score's reviewed tsv file
-    #     # and accumulate transition counts from all scores
-    #     df = load_tsv(score)
-    #     df_with_root_prog = root_progression(df)
-    #     _, transition_counts = prog_type_count(df_with_root_prog)
-    #     global_transition_counts += transition_counts
-
-    # # 1) Conditional: (rows sum to 1)
-    # cond_probs = global_transition_counts.div(
-    #     global_transition_counts.sum(axis=1), axis=0
-    # ).fillna(0.0)
-
-    # # 2) Unconditional:  (sums to 1 over all cells)
-    # total_transitions = global_transition_counts.to_numpy().sum()
-    # uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
-
-    # # Save / plot both
-    # plot_progression_heatmap(f"{composer}_COND", cond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
-    # plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs,categories=SIMPLE_PROGRESSION_CATEGORIES)
-
-
+def get_uncond_probs(global_transition_counts):
+        # Unconditional Probabilities - sums to 1 over all cells
+    total_transitions = global_transition_counts.to_numpy().sum()
+    uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
+    return uncond_probs
 

@@ -10,7 +10,9 @@ from my_functions import (add_root_diff,
                         composer_percentages_from_piece_counts,
                         piece_percentages_from_counts,
                         count_prog_type_per_composer,
-                        row_normalized_progression_probs)
+                        row_normalized_progression_probs,
+                        get_cond_probs,
+                        get_uncond_probs)
 
 from visualization import plot_progression_heatmap
 
@@ -20,6 +22,15 @@ def myself():
         2. Run a loop for each composer and create a DF for each composer.
         3. On these DFs, perform the analysis, create features.
     """
+
+    from pathlib import Path
+
+    base = Path("output")
+
+    (base / "img").mkdir(parents=True, exist_ok=True)
+    (base / "csv").mkdir(parents=True, exist_ok=True)
+
+
     ROOT = Path(ROOT_PATH)
     repos = [
         "bach_en_fr_suites",
@@ -69,8 +80,9 @@ def myself():
     }
 
     for composer, tsv_files in composer_dict.items():
+        """ Operations per Composer here"""
         print(f"Processing composer: {composer} with {len(tsv_files)} scores...")
-        progression_count_per_piece_per_composer = []
+        prog_count_per_piece_per_composer = []
         piece_dfs=[]
         global_transition_counts = pd.DataFrame(0, 
                                                 index=list(SIMPLE_PROGRESSION_CATEGORIES), 
@@ -78,6 +90,7 @@ def myself():
                                                 dtype=int)
 
         for tsv in tsv_files:
+            """ Operations per Piece here """
             # Loop through each score's reviewed tsv file
             # Add root difference
             # Add root progression types
@@ -89,9 +102,7 @@ def myself():
             df = add_root_progression_type_simple(df)
             df = add_root_progression_type_fine(df)
 
-            progression_count_per_piece = build_progression_count_per_piece(path, df, composer)
-            progression_count_per_piece_per_composer.append(progression_count_per_piece)
-
+            prog_count_per_piece_per_composer.append(build_progression_count_per_piece(path, df, composer))
             global_transition_counts += row_normalized_progression_probs(df)
             piece_dfs.append(df)
         
@@ -102,31 +113,18 @@ def myself():
         transition_counts_per_composer = count_prog_type_per_composer(composer_df)
         print(transition_counts_per_composer)
         
-        prog_count_per_piece = pd.DataFrame(progression_count_per_piece_per_composer)
-        # stable column order
+        prog_count_per_piece = pd.DataFrame(prog_count_per_piece_per_composer)
+        # Stable column order
         prog_count_per_piece = prog_count_per_piece[["composer", "piece", "n"] + list(SIMPLE_PROGRESSION_CATEGORIES) ]
         piece_level_prog_percentages = piece_percentages_from_counts(prog_count_per_piece)
         prog_count_per_composer = composer_percentages_from_piece_counts(prog_count_per_piece)
 
-        # Might be unused:row_normalized_progression_probs(composer, tsv_files)
-
-        # Conditional Probabilities - rows sum to 1
-        cond_probs = global_transition_counts.div(
-            global_transition_counts.sum(axis=1), axis=0
-        ).fillna(0.0)
-
+        cond_probs = get_cond_probs(global_transition_counts)
+        uncond_probs = get_uncond_probs(global_transition_counts)
         
-        # Unconditional Probabilities - sums to 1 over all cells
-        total_transitions = global_transition_counts.to_numpy().sum()
-        uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
-
         # Save / plot both
         plot_progression_heatmap(f"{composer}_COND", cond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES)
         plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES)
-
-
-
-
         # Output to .csv
         prog_count_per_piece.to_csv(f"output/csv/{composer}_piece_counts.csv",index=False)
         piece_level_prog_percentages.to_csv(f"output/csv/{composer}_piece_prog_percentages.csv",index=False)    
