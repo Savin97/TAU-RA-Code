@@ -1,0 +1,7 @@
+0. Split into 2 systems - martin's and uri's
+1. For Uri's system - delete rows with root_diff=0
+2. 2 rows that have the same root - delete the second row
+3. For every piece, on every harmonic label (in both systems) - the value will be the resulting weight of the unigram (prog_weight) and the bigram_weight.
+4. Build a table per piece, sum of these values for every root_diff, something like { -4: 12.5, 2: 3.75}.
+5. 21x21 matrix with each cell showing sum of the bigrams( for ex. -2 to 3)
+call them weighted unigrams, weighted bigrams

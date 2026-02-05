@@ -1,5 +1,6 @@
 ALL_PROG_LABELS = ("S", "A", "W", "I", "!")
 SIMPLE_PROGRESSION_CATEGORIES = ("S", "A", "W","I")
+FINE_PROGRESSION_LABELS = ("S_dia", "WA_dia", "S_chr", "WA_chr")
 OUTPUT_PATH = "output"
 ROOT_PATH = "."   # point this to the folder containing the 4 repos
 ROOT_DIFF_VALUES = tuple(range(-10, 0)) + tuple(range(1, 11))
@@ -11,5 +12,4 @@ FINE_PROGRESSION_MAP = {
     "WA_chr": {7, 8, 9, -6, -7, -9, -10}
 }
 
-# Convenience: full label order (useful for tables/heatmaps)
-FINE_PROGRESSION_LABELS = ("S_dia", "WA_dia", "S_chr", "WA_chr")
+

@@ -1,0 +1,6 @@
+3. Delete all I progs out of consideration. 
+4. Check progressions of S total, how many S one after the other.
+5. Check out heat maps - should be in one of the papers that uri sent - about 
+6. Make a visual represantion similar to the heat maps for a 3x3 table of S,A,W progs - darker in color for more likely. BUT, meaning - how likely is S going to A, S going to S, etc.
+7. make a bigram (heat map) for every part of bach, mozart, debussy (get more of their pieces from the git)
+(its from the paper TISMIR, 2021 hentschel rohrmeier mozart sonatas)

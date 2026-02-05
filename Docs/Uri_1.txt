@@ -1,0 +1,9 @@
+To-Do:
+Yannis' Mail:
+1. distant listening - read the report, about the corpora, etc
+2. Pythonic link - go over code
+3. Check the private superset, ask Yannis for access
+4. Write an executive report
+5. Get to know the corpus, the analyses
+ 
+ Write every interesting idea and send to Uri

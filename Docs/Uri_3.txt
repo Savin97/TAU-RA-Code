@@ -1,0 +1,21 @@
+D! 1. Write a script that changes the columns with 4/4,etc to readable text instead of date - make it plug&play
+
+2. Figure out all the formulas, functions and variables in the paper.
+3. Read the paper
+4. Krumhansl dissonance - read a bit how dissonance is tested in experiments
+5. For every label - get the root as a note name, or as a note name but putting every piece's key as C major/minor
+
+D! 6. Using the root column in the reviewed .tsv, Assign with letters/colors strong and weak root progressions:
+Tritone(+6 fifth steps from C(from the paper)) - strong
+if between two rows theres a root change thats:
+
+Strong - Fifth down (-1) or -4, +6, +3, -7 - in the second row put the word "S" for strong (attention: this is in relation to he previous label, so start from the 2nd row).
+
+Super strong will be "A" -  artifical (second and seventh, -2,+2,+5,-5, +9,-9, +8, -8). Else: put a "!" (for example C and A#).
+
+Weak progressions are the inverse (+1,+4,-6,-3, 7). Label as "W".
+If its the same root - put an "I" for identical.
+
+Pay attention to how many consecutive "W" progressions there are - should be rare.
+
+Compare the 3 composers, do some statistical analysis on consecutive progressions.

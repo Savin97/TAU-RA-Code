@@ -1,0 +1,11 @@
+1. How to force excel not to format as dates, columns such as timesig
+2. Find staffs notated as higher numbers
+3. Send Uri the documentation
+4. Check offset_x,y
+5. Create a file from the bach, mozart and debussy reviewed files, that takes the timestamps that have labels and from the notes files, filters rows that have harmonic labels (chord labels). Its fine if they have red notes
+
+
+Target:
+Find a progression between different pieces from different periods.
+Where the harmony changes.
+For every timestamp, make only one row that will have a column which will show all chord notes

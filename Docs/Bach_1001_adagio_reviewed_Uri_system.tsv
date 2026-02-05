@@ -1,0 +1,92 @@
+mc	mc_onset	mc_onset_num	dur	annotation_dur	timesig	timesig_num	root	root_diff	prog_weight(dur)	staff	voice	label	globalkey	localkey	pedal	chord	numeral	form	figbass	changes	relativeroot	cadence	phraseend	chord_type	globalkey_is_minor	localkey_is_minor	chord_tones	added_tones	bass_note
+1	0	0.0000			04-Apr	1.00	1			1	1	g.i{	g	i		i	i						{	m	1	1	"1, -2, 2"		1
+1	00-Jan	0.5000	0.5000	0.5000	04-Apr	1.00	6	5	0.7500	1	1	#viio6(2)	g	i		#viio6(2)	#vii	o	6	2				o	1	1	"3, 0, 1"		3
+1	03-Apr	0.7500	0.2500	0.2500	04-Apr	1.00	2	-4	1.0000	1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+2	1/2	0.5000	-0.2500	0.7500	04-Apr	1.00	1	-1	1.0000	1	1	i}	g	i		i	i						}	m	1	1	"1, -2, 2"		1
+2	3/4	0.7500	0.2500	0.2500	04-Apr	1.00	-3	-4	0.5000	1	1	VI6	g	i		VI6	VI		6					M	1	1	"1, -2, -3"		1
+3	0	0.0000	-0.7500	0.2500	04-Apr	1.00	2	5	0.5000	1	1	v6(2)	g	i		v6(2)	v		6	2				m	1	1	"-1, 3, -3"		-1
+3	01-Apr	0.2500	0.2500	0.2500	04-Apr	1.00	2	0	0.2500	1	1	v6	g	i		v6	v		6					m	1	1	"-1, 3, 2"		-1
+3	03-Aug				04-Apr	1.00	2			1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+3	01-Feb				04-Apr	1.00	0			1	1	iv6(2)	g	i		iv6(2)	iv		6	2				m	1	1	"-3, 1, 2"		-3
+3	15/16				04-Apr	1.00	0			1	1	iv6	g	i		iv6	iv		6					m	1	1	"-3, 1, 0"		-3
+4	0				04-Apr	1.00	2			1	1	V(4)	g	i		V(4)	V			4				M	1	1	"2, 1, 3"		2
+4	01-Aug				04-Apr	1.00	2			1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+4	03-Aug				04-Apr	1.00	2			1	1	V7	g	i		V7	V		7					Mm7	1	1	"2, 6, 3, 0"		2
+4	01-Feb				04-Apr	1.00	1			1	1	i	g	i		i	i							m	1	1	"1, -2, 2"		1
+4	07-Aug				04-Apr	1.00	1			1	1	v.iv7	g	v		iv7	iv		7					mm7	1	1	"1, -2, 2, -1"		1
+5	0				04-Apr	1.00	3			1	1	V6	g	v		V6	V		6					M	1	1	"7, 4, 3"		7
+5	01-Apr				04-Apr	1.00	2			1	1	i	g	v		i	i							m	1	1	"2, -1, 3"		2
+5	01-Feb				04-Apr	1.00	-3			1	1	bII6(2)	g	v		bII6(2)	bII		6	2				M	1	1	"1, -2, -1"		1
+5	05-Aug				04-Apr	1.00	-3			1	1	bII6	g	v		bII6	bII		6					M	1	1	"1, -2, -3"		1
+6	0				04-Apr		3			1	1	V2	g	v		V2	V		2					Mm7	1	1	"1, 3, 7, 4"		1
+6	01-Apr				04-Apr		2			1	1	i6	g	v		i6	i		6					m	1	1	"-1, 3, 2"		-1
+6	01-Feb				04-Apr		7			1	1	#viio6(2)	g	v		#viio6(2)	#vii	o	6	2				o	1	1	"4, 1, 2"		4
+6	03-Apr				04-Apr		3			1	1	V43	g	v		V43	V		43					Mm7	1	1	"4, 1, 3, 7"		4
+7	0				04-Apr		2			1	1	i(4)	g	v		i(4)	i			4				m	1	1	"2, 1, 3"		2
+7	01-Apr				04-Apr		2			1	1	i	g	v		i	i							m	1	1	"2, -1, 3"		2
+7	03-Aug				04-Apr		3			1	1	v6	g	v		v6	v		6					m	1	1	"0, 4, 3"		0
+7	01-Feb				04-Apr		1			1	1	iv6(2)	g	v		iv6(2)	iv		6	2				m	1	1	"-2, 2, 3"		-2
+7	05-Aug				04-Apr		1			1	1	iv6	g	v		iv6	iv		6					m	1	1	"-2, 2, 1"		-2
+7	03-Apr				04-Apr		4			1	1	iio64	g	v		iio64	ii	o	64					o	1	1	"-2, 4, 1"		-2
+8	0				04-Apr		3			1	1	V7(4)	g	v		V7(4)	V		7	4				Mm7	1	1	"3, 2, 4, 1"		3
+8	01-Aug				04-Apr		3			1	1	V7	g	v		V7	V		7					Mm7	1	1	"3, 7, 4, 1"		3
+8	01-Apr				04-Apr		3			1	1	V(64)	g	v		V(64)	V			64				M	1	1	"3, 2, -1"		3
+8	01-Feb				04-Apr		3			1	1	V(4)	g	v		V(4)	V			4				M	1	1	"3, 2, 4"		3
+8	03-Apr				04-Apr		3			1	1	V	g	v		V	V							M	1	1	"3, 7, 4"		3
+9	0				04-Apr		2			1	1	i}	g	v		i	i						}	m	1	1	"2, -1, 3"		2
+9	Sep-32				04-Apr		1			1	1	i.i6{	g	i		i6	i		6				{	m	1	1	"-2, 2, 1"		-2
+9	01-Feb				04-Apr		6			1	1	#viio65	g	i		#viio65	#vii	o	65					o7	1	1	"3, 0, -3, 6"		3
+10	0				04-Apr		1			1	1	i	g	i		i	i							m	1	1	"1, -2, 2"		1
+10	01-Feb				04-Apr		2			1	1	V(4)	g	i		V(4)	V			4				M	1	1	"2, 1, 3"		2
+10	05-Aug				04-Apr		2			1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+10	03-Apr				04-Apr		1			1	1	iv.V7	g	iv		V7	V		7					Mm7	1	1	"1, 5, 2, -1"		1
+11	0				04-Apr		0			1	1	i(9#7)	g	iv		i(9#7)	i			9#7				m	1	1	"0, -3, 1"	"2, 5"	0
+11	01-Aug				04-Apr		0			1	1	i6	g	iv		i6	i		6					m	1	1	"-3, 1, 0"		-3
+11	01-Apr				04-Apr		2			1	1	viio6/III	g	iv		viio6/III	vii	o	6		III			o	1	1	"-1, -4, 2"		-1
+11	03-Aug				04-Apr		-3			1	1	III6	g	iv		III6	III		6					M	1	1	"1, -2, -3"		1
+11	01-Feb				04-Apr		-2			1	1	V2/III	g	iv		V2/III	V		2		III			Mm7	1	1	"-4, -2, 2, -1"		-4
+11	03-Apr				04-Apr		-2			1	1	V65/III	g	iv		V65/III	V		65		III			Mm7	1	1	"2, -1, -4, -2"		2
+12	0				04-Apr		-3			1	1	III	g	iv		III	III							M	1	1	"-3, 1, -2"		-3
+12	01-Apr				04-Apr		-3			1	1	V7/IV/III	g	iv		V7/IV/III	V		7		IV/III			Mm7	1	1	"-3, 1, -2, -5"		-3
+12	01-Feb				04-Apr		-4			1	1	IV/III	g	iv		IV/III	IV				III			M	1	1	"-4, 0, -3"		-4
+12	05-Aug				04-Apr		-1			1	1	ii6/III	g	iv		ii6/III	ii		6		III			m	1	1	"-4, 0, -1"		-4
+12	03-Apr				04-Apr		-2			1	1	V(4)/III	g	iv		V(4)/III	V			4	III			M	1	1	"-2, -3, -1"		-2
+12	07-Aug				04-Apr		-2			1	1	V/III	g	iv		V/III	V				III			M	1	1	"-2, 2, -1"		-2
+13	0				04-Apr		3			1	1	viio7/V/III}	g	iv		viio7/V/III	vii	o	7		V/III		}	o7	1	1	"3, 0, -3, -6"		3
+13	01-Apr				04-Apr		5			1	1	#viio7{	g	iv		#viio7	#vii	o	7				{	o7	1	1	"5, 2, -1, -4"		5
+13	01-Feb				04-Apr		0			1	1	i6	g	iv		i6	i		6					m	1	1	"-3, 1, 0"		-3
+13	03-Apr				04-Apr		1			1	1	V	g	iv		V	V							M	1	1	"1, 5, 2"		1
+14	0				04-Apr		0			1	1	i}{	g	iv		i	i						}{	m	1	1	"0, -3, 1"		0
+14	01-Feb				04-Apr		5			1	1	#viio6(2)	g	iv		#viio6(2)	#vii	o	6	2				o	1	1	"2, -1, 0"		2
+14	05-Aug				04-Apr		5			1	1	#viio6	g	iv		#viio6	#vii	o	6					o	1	1	"2, -1, 5"		2
+14	03-Apr				04-Apr		1			1	1	V	g	iv		V	V							M	1	1	"1, 5, 2"		1
+15	0				04-Apr		1			1	1	V7	g	iv		V7	V		7					Mm7	1	1	"1, 5, 2, -1"		1
+15	01-Feb				04-Apr		0			1	1	i}	g	iv		i	i						}	m	1	1	"0, -3, 1"		0
+15	03-Apr				04-Apr		-4			1	1	VI6	g	iv		VI6	VI		6					M	1	1	"0, -3, -4"		0
+16	0				04-Apr		1			1	1	v65(2)	g	iv		v65(2)	v		65	2				mm7	1	1	"-2, 2, -1, -4"		-2
+16	01-Apr				04-Apr		1			1	1	v65	g	iv		v65	v		65					mm7	1	1	"-2, 2, -1, 1"		-2
+16	03-Aug				04-Apr		1			1	1	V	g	iv		V	V							M	1	1	"1, 5, 2"		1
+16	01-Feb				04-Apr		-1			1	1	iv65(2)	g	iv		iv65(2)	iv		65	2				mm7	1	1	"-4, 0, -3, 1"		-4
+16	03-Apr				04-Apr		-1			1	1	iv65	g	iv		iv65	iv		65					mm7	1	1	"-4, 0, -3, -1"		-4
+17	0				04-Apr		1			1	1	V(4)	g	iv		V(4)	V			4				M	1	1	"1, 0, 2"		1
+17	01-Aug				04-Apr		1			1	1	V	g	iv		V	V							M	1	1	"1, 5, 2"		1
+17	01-Apr				04-Apr		1			1	1	V7	g	iv		V7	V		7					Mm7	1	1	"1, 5, 2, -1"		1
+17	03-Aug				04-Apr		1			1	1	V65	g	iv		V65	V		65					Mm7	1	1	"5, 2, -1, 1"		5
+17	01-Feb				04-Apr		0			1	1	i	g	iv		i	i							m	1	1	"0, -3, 1"		0
+18	0				04-Apr		6			1	1	i.#viio7	g	i		#viio7	#vii	o	7					o7	1	1	"6, 3, 0, -3"		6
+18	01-Apr				04-Apr		1			1	1	i	g	i		i	i							m	1	1	"1, -2, 2"		1
+18	01-Feb				04-Apr		-4			1	1	bII6(2)	g	i		bII6(2)	bII		6	2				M	1	1	"0, -3, -2"		0
+18	05-Aug				04-Apr		-4			1	1	bII6	g	i		bII6	bII		6					M	1	1	"0, -3, -4"		0
+19	0				04-Apr		2			1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+19	01-Apr				04-Apr		1			1	1	i6	g	i		i6	i		6					m	1	1	"-2, 2, 1"		-2
+19	01-Feb				04-Apr		6			1	1	#viio6(2)	g	i		#viio6(2)	#vii	o	6	2				o	1	1	"3, 0, 1"		3
+19	03-Apr				04-Apr		2			1	1	V43	g	i		V43	V		43					Mm7	1	1	"3, 0, 2, 6"		3
+20	0				04-Apr		1			1	1	i(4)	g	i		i(4)	i			4				m	1	1	"1, 0, 2"		1
+20	01-Apr				04-Apr		1			1	1	i	g	i		i	i							m	1	1	"1, -2, 2"		1
+20	01-Feb				04-Apr		-4			1	1	bII6	g	i		bII6	bII		6					M	1	1	"0, -3, -4"		0
+21	0				04-Apr		2			1	1	V2(4)	g	i		V2(4)	V		2	4				Mm7	1	1	"0, 2, 1, 3"		0
+21	01-Aug				04-Apr		2			1	1	V2	g	i		V2	V		2					Mm7	1	1	"0, 2, 6, 3"		0
+21	03-Aug				04-Apr		3			1	1	V65/V	g	i		V65/V	V		65		V			Mm7	1	1	"7, 4, 1, 3"		7
+21	01-Feb				04-Apr		2			1	1	V(4)	g	i		V(4)	V			4				M	1	1	"2, 1, 3"		2
+21	15/16				04-Apr		2			1	1	V	g	i		V	V							M	1	1	"2, 6, 3"		2
+22	0				04-Apr		1			1	1	i}	g	i		i	i						}	m	1	1	"1, -2, 2"		1

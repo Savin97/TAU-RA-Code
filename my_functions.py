@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from config import SIMPLE_PROGRESSION_CATEGORIES
+from config import SIMPLE_PROGRESSION_CATEGORIES, FINE_PROGRESSION_LABELS
 
 from utilities import load_tsv
 
@@ -137,3 +137,106 @@ def get_uncond_probs(global_transition_counts):
     uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
     return uncond_probs
 
+def piece_progression_type_distribution(df, score, labels = SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
+    """
+        Returns a Series with percentages of each progression type label for ONE piece.
+        Index = labels, values = percentages (0..1).
+        sample output:
+        S    81
+        I    41
+        A    41
+        W    27
+    """
+    if labels == SIMPLE_PROGRESSION_CATEGORIES:
+        total_prog_strength_counts = df["progression_type_simple"].dropna()
+    elif labels == FINE_PROGRESSION_LABELS:
+        total_prog_strength_counts = df["progression_type_fine"].dropna()
+
+    # 2 columns: counts of all prog types for this piece
+    counts = total_prog_strength_counts.value_counts()
+    # ensure all labels exist
+    counts = counts.reindex(labels, fill_value=0)
+
+    total = counts.sum()
+    if total == 0:
+        return pd.Series({lab: 0.0 for lab in labels}, name=str(score))
+
+    return (counts / total).rename(str(score))
+
+def piece_transition_unconditional(df, score, categories=SIMPLE_PROGRESSION_CATEGORIES) -> pd.Series:
+    """
+        Returns unconditional transition percentages for ONE piece over the selected categories.
+        Output is a flattened Series with index like 'S->A', 'A->W', etc.
+        Values sum to 1 across all included transitions (unless total is 0).
+    """
+    transition_counts = count_prog_type_per_composer(df, categories=categories)
+
+    total = transition_counts.to_numpy().sum()
+    if total == 0:
+        # return all zeros with consistent index
+        idx = [f"{i}->{j}" for i in transition_counts.index for j in transition_counts.columns]
+        return pd.Series(0.0, index=idx, name=str(score))
+
+    uncond = transition_counts / total
+    # uncond = get_uncond_probs(df) # Doesnt work here
+    # flatten
+    out = uncond.stack()
+    out.index = [f"{i}->{j}" for (i, j) in out.index]
+    out.name = str(score)
+    return out
+
+
+# def build_piece_level_tables(composer_dict: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+#     """
+#     composer_dict: {"Bach": [Path(...), ...], "Mozart": [...], ...}
+
+#     Returns:
+#       dist_df: rows = pieces, cols = A/S/W/I/! (+ composer, piece)
+#       trans_df: rows = pieces, cols = 'S->A', ... (+ composer, piece)
+#     """
+#     dist_rows = []
+#     trans_rows = []
+
+#     for composer, files in composer_dict.items():
+#         for score_path in files:
+#             score_path = Path(score_path)
+
+#             dist = piece_progression_type_distribution(df, score)
+#             dist_rows.append(
+#                 {"composer": composer, "piece": score_path.stem, **dist.to_dict()}
+#             )
+
+#             trans = piece_transition_unconditional(df, score)
+#             trans_rows.append(
+#                 {"composer": composer, "piece": score_path.stem, **trans.to_dict()}
+#             )
+
+#     dist_df = pd.DataFrame(dist_rows)
+#     trans_df = pd.DataFrame(trans_rows)
+
+#     # Optional: nicer column order
+#     dist_cols = ["composer", "piece"] + [c for c in ALL_PROG_LABELS if c in dist_df.columns]
+#     dist_df = dist_df.reindex(columns=dist_cols)
+
+#     trans_df = trans_df.fillna(0.0)
+
+#     return dist_df, trans_df
+
+
+def aggregate_progression_distribution(dist_df: pd.DataFrame):
+    """
+    Takes dist_df (piece-level percentages) and produces composer-level percentages.
+    IMPORTANT: averaging percentages weights pieces equally. 
+    """
+    label_cols = [c for c in SIMPLE_PROGRESSION_CATEGORIES if c in dist_df.columns]
+    agg = dist_df.groupby("composer")[label_cols].mean()  # equal weight per piece
+    return agg
+
+
+def aggregate_transition_unconditional(trans_df: pd.DataFrame):
+    """
+    Composer-level average of per-piece unconditional transition distributions (equal weight per piece).
+    """
+    trans_cols = [c for c in trans_df.columns if c not in ("composer", "piece")]
+    agg = trans_df.groupby("composer")[trans_cols].mean()
+    return agg

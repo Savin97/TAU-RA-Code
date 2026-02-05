@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from config import ROOT_PATH, SIMPLE_PROGRESSION_CATEGORIES
+from config import ROOT_PATH, SIMPLE_PROGRESSION_CATEGORIES, ALL_PROG_LABELS
 from utilities import load_tsv
 from my_functions import (add_root_diff,
                         add_root_progression_type_simple,
@@ -12,7 +12,11 @@ from my_functions import (add_root_diff,
                         count_prog_type_per_composer,
                         row_normalized_progression_probs,
                         get_cond_probs,
-                        get_uncond_probs)
+                        get_uncond_probs,
+                        piece_progression_type_distribution,
+                        piece_transition_unconditional,
+                        aggregate_progression_distribution,
+                        aggregate_transition_unconditional)
 
 from visualization import plot_progression_heatmap
 
@@ -88,8 +92,11 @@ def myself():
                                                 index=list(SIMPLE_PROGRESSION_CATEGORIES), 
                                                 columns=list(SIMPLE_PROGRESSION_CATEGORIES), 
                                                 dtype=int)
+        dist_rows = []
+        trans_rows = []
 
         for tsv in tsv_files:
+            score = Path(tsv).stem.removesuffix("_reviewed")
             """ Operations per Piece here """
             # Loop through each score's reviewed tsv file
             # Add root difference
@@ -101,6 +108,17 @@ def myself():
             df = add_root_diff(df)
             df = add_root_progression_type_simple(df)
             df = add_root_progression_type_fine(df)
+            
+            dist = piece_progression_type_distribution(df, score)
+            dist_rows.append(
+                {"composer": composer, "piece": score, **dist.to_dict()}
+            )
+
+            trans = piece_transition_unconditional(df, score)
+            trans_rows.append(
+                {"composer": composer, "piece": score, **trans.to_dict()}
+            )
+
 
             prog_count_per_piece_per_composer.append(build_progression_count_per_piece(path, df, composer))
             global_transition_counts += row_normalized_progression_probs(df)
@@ -111,6 +129,7 @@ def myself():
             composer_df = pd.concat([composer_df,piece], ignore_index=True)
 
         transition_counts_per_composer = count_prog_type_per_composer(composer_df)
+        print("\n\n---------------------------\ntransition_counts_per_composer\n---------------------")
         print(transition_counts_per_composer)
         
         prog_count_per_piece = pd.DataFrame(prog_count_per_piece_per_composer)
@@ -130,8 +149,20 @@ def myself():
         piece_level_prog_percentages.to_csv(f"output/csv/{composer}_piece_prog_percentages.csv",index=False)    
         prog_count_per_composer.to_csv(f"output/csv/{composer}_prog_count_per_composer.csv",index=False)    
 
-    prog_count_all_composers = df
+    dist_df = pd.DataFrame(dist_rows)
+    trans_df = pd.DataFrame(trans_rows)
 
+    # Optional: nicer column order
+    dist_cols = ["composer", "piece"] + [c for c in ALL_PROG_LABELS if c in dist_df.columns]
+    dist_df = dist_df.reindex(columns=dist_cols)
+    # dist_df.to_csv("dist_df_debug.csv",index=False)
+    trans_df = trans_df.fillna(0.0)
+    # trans_df.to_csv("trans_df_debug.csv",index=False)
+
+    composer_progs = aggregate_progression_distribution(dist_df)
+    composer_prog_transitions = aggregate_transition_unconditional(trans_df)
+    composer_progs.to_csv("composer_progs.csv",index=False)
+    composer_prog_transitions.to_csv("composer_prog_transitions.csv",index=False)
     print("\n--------------------")
     print("Execution Complete.")
 

@@ -306,7 +306,7 @@ def build_piece_level_tables(composer_dict: dict) -> tuple[pd.DataFrame, pd.Data
     return dist_df, trans_df
 
 
-def aggregate_progression_distribution(dist_df: pd.DataFrame) -> pd.DataFrame:
+def aggregate_progression_distribution(dist_df: pd.DataFrame):
     """
     Takes dist_df (piece-level percentages) and produces composer-level percentages.
     IMPORTANT: averaging percentages weights pieces equally. 
@@ -316,7 +316,7 @@ def aggregate_progression_distribution(dist_df: pd.DataFrame) -> pd.DataFrame:
     return agg
 
 
-def aggregate_transition_unconditional(trans_df: pd.DataFrame) -> pd.DataFrame:
+def aggregate_transition_unconditional(trans_df: pd.DataFrame):
     """
     Composer-level average of per-piece unconditional transition distributions (equal weight per piece).
     """
@@ -329,7 +329,6 @@ def aggregate_transition_unconditional(trans_df: pd.DataFrame) -> pd.DataFrame:
 # -------------------------------------------------------------------
 # Root-change (diff value) transition matrix (requested 21x21)
 # -------------------------------------------------------------------
-
 
 def root_change_transition_counts(dfp: pd.DataFrame, diffs=ROOT_DIFF_VALUES) -> pd.DataFrame:
     """
