@@ -5,7 +5,6 @@ from pathlib import Path
 
 from config import (SIMPLE_PROGRESSION_CATEGORIES, 
                     ALL_PROG_LABELS, 
-                    FINE_PROGRESSION_MAP, 
                     FINE_PROGRESSION_LABELS,
                     ROOT_DIFF_VALUES)
 from visualization import plot_progression_heatmap
@@ -123,10 +122,16 @@ def classify_root_movement_classic_fine(diff):
 
     diff = int(diff)
 
-    for label, s in FINE_PROGRESSION_MAP.items():
-        if diff in s:
-            return label
-    return "!" # should never happen
+    if diff in {3, -1, -4}:
+        return "S_dia"
+    elif diff in {1, 2, 4, 5, -2, -3, -5}:
+        return "WA_dia"
+    elif diff in {6, 10, -8}:
+        return "S_chr"
+    elif diff in {7, 8, 9, -6, -7, -9, -10}:
+        return "WA_chr"
+    else:
+        return "!" # should never happen
 
 
 def root_progression(df):

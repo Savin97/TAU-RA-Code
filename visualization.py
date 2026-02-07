@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from config import SIMPLE_PROGRESSION_CATEGORIES, OUTPUT_PATH, ROOT_DIFF_VALUES
-
-OUTPUT = Path(OUTPUT_PATH)
+from config import SIMPLE_PROGRESSION_CATEGORIES_URI, FINE_PROGRESSION_CATEGORIES_URI , ALL_PROGRESSION_VALUES_URI, OUTPUT_PATH
 
 def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
     ann_threshold=0.01   # only label cells >= this
@@ -28,7 +26,7 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
     ax.grid(which="minor", linewidth=0.3)
 
     ax.set_title(f"{composer}", fontsize=40)
-    if categories == ROOT_DIFF_VALUES:
+    if categories == ALL_PROGRESSION_VALUES_URI:
         ax.set_xlabel("Next progression (No. of 5ths)", fontsize=30)
         ax.set_ylabel("Current progression (No. of 5ths)", fontsize=30)
     else:
@@ -54,6 +52,14 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
     plt.savefig(f"{OUTPUT_PATH}/img/{composer}.png")
     plt.close()
 
+def save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine, uncond_probs_fine, cond_trim, uncond_trim, diff_cats_trim):
+    # Save heatmaps for progression probabilities
+    plot_progression_heatmap(f"{composer}_COND", cond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
+    plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
+    plot_progression_heatmap(f"{composer}_FINE_COND", cond_probs_fine, categories=FINE_PROGRESSION_CATEGORIES_URI)
+    plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond_probs_fine, categories=FINE_PROGRESSION_CATEGORIES_URI)
+    plot_progression_heatmap(f"{composer}_DIFF_COND", cond_trim, categories=diff_cats_trim)
+    plot_progression_heatmap(f"{composer}_DIFF_UNCOND", uncond_trim, categories=diff_cats_trim)
 
 # def composer_progression_percentage_heatmap(df_plot, label_cols= PROGRESSION_CATEGORIES):
 #     # Heatmap (composers x labels) with annotations
