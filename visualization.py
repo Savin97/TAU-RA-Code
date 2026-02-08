@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from config import SIMPLE_PROGRESSION_CATEGORIES_URI, FINE_PROGRESSION_CATEGORIES_URI , ALL_PROGRESSION_VALUES_URI, OUTPUT_PATH
 
 def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
@@ -11,12 +10,6 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
 
     vmax = np.max(data)
     fig, ax = plt.subplots(figsize=(21, 21))
-
-    # if categories == ROOT_DIFF_VALUES:
-    #     fig, ax = plt.subplots(figsize=(8, 6), dpi=400)
-
-    # else:
-    #     fig, ax = plt.subplots(figsize=(6, 4), dpi=210)
     im = ax.imshow(data, aspect="equal", cmap="Reds", vmin=0.0, vmax=vmax)
 
     ax.set_xticks(np.arange(len(cats)))
@@ -33,7 +26,6 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
         ax.set_xlabel("Next progression", fontsize=30)
         ax.set_ylabel("Current progression", fontsize=30)
 
-
     # Light grid for readability
     ax.set_xticks(np.arange(-.5, len(cats), 1), minor=True)
     ax.set_yticks(np.arange(-.5, len(cats), 1), minor=True)
@@ -45,7 +37,6 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
 
     for (i, j) in coords:
             ax.text(j, i, f"{data[i, j]:.2f}", ha="center", va="center", fontsize=24)
-
 
     cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
     plt.tight_layout()

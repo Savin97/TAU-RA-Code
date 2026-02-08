@@ -9,22 +9,8 @@ from config import (ALL_PROG_CATEGORIES,
                     ALL_PROGRESSION_VALUES_URI,
                     ALL_PROGRESSION_VALUES_MARTIN)
 
-from utilities import load_tsv
-
-from classifying_functions import classify_movement_SAWI, classify_movement_fine
+from utilities import classify_movement_SAWI, classify_movement_fine
 from visualization import plot_progression_heatmap
-
-def add_root_diff(df):
-    df["root_diff"] = df["root"].diff()
-    return df
-
-def add_root_progression_type_simple(df):
-    df["progression_type_simple"] = df["root_diff"].apply(classify_movement_SAWI)
-    return df
-
-def add_root_progression_type_fine(df):
-    df["progression_type_fine"] = df["root_diff"].apply(classify_movement_fine)
-    return df
 
 def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_CATEGORIES_URI) -> pd.Series:
     """
@@ -244,8 +230,8 @@ def fine_progression_transition_counts(df: pd.DataFrame,
     return counts
 
 
-def get_fine_progression_matrix(composer: str, global_fine_prog_counts):
-    labels = list(FINE_PROGRESSION_CATEGORIES_URI)
+def get_fine_progression_matrix(composer: str, global_fine_prog_counts, categories = FINE_PROGRESSION_CATEGORIES_URI):
+    labels = list(categories)
     # for score in reviewed_tsv_files:
     #     df = load_tsv(score)
     #     dfp = root_progression(df)

@@ -8,13 +8,11 @@ from config import (ALL_PROG_CATEGORIES,
                     FINE_PROGRESSION_CATEGORIES_MARTIN,
                     ALL_PROGRESSION_VALUES_URI,
                     ALL_PROGRESSION_VALUES_MARTIN,
-                    ROOT_PATH
+                    REPOS
                     )
-from utilities import get_diff_categories_trimmed, load_tsv, make_csv, check_dirs
-from my_functions import (add_root_diff,
-                          add_root_progression_type_simple,
-                          add_root_progression_type_fine, 
-                          aggregate_prog_transition_unconditional, 
+from fetch_scores import download_reviewed_folder
+from utilities import create_composer_file_lists, get_diff_categories_trimmed, load_tsv, make_csv, check_dirs
+from my_functions import (aggregate_prog_transition_unconditional, 
                           aggregate_root_progs, 
                           all_root_prog_transition_counts, 
                           build_composer_prog_trans_df,
@@ -30,6 +28,7 @@ from my_functions import (add_root_diff,
                           aggregate_prog_transition_unconditional,
                           build_composer_prog_dist_df,
                           build_composer_prog_trans_df)
+from per_piece_functions import add_root_diff, add_root_progression_type_simple, add_root_progression_type_fine
 from visualization import save_heatmaps
 
 def myself():
@@ -40,43 +39,15 @@ def myself():
     """
     # Check that output directories exist, if not - create them
     check_dirs()
-    ROOT = Path(ROOT_PATH)
-    repos = [
-        "bach_en_fr_suites",
-        "bach_solo",
-        # "beethoven_piano_sonatas",
-        # "ABC",
-        # "chopin_mazurkas",
-        # "mozart_piano_sonatas",
-        # "liszt_pelerinage"
-    ]
 
-    all_reviewed_tsv_files, bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files = [], [], [], [], [], []
+    for repo in REPOS:
+        download_reviewed_folder(repo)
 
-    # Loop through each repository and collect reviewed TSV files
-    for repo in repos:
-        reviewed_dir = ROOT / repo / "reviewed"
-        all_reviewed_tsv_files += list(reviewed_dir.rglob("*_reviewed.tsv"))
-
-        if repo == "bach_en_fr_suites":
-            bach_tsv_files += list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "bach_solo":
-            bach_tsv_files += list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "chopin_mazurkas":
-            chopin_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "beethoven_piano_sonatas":
-            beethoven_tsv_files += list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "ABC":
-            beethoven_tsv_files += list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "mozart_piano_sonatas":
-            mozart_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
-        elif repo == "liszt_pelerinage":
-            liszt_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
-
+    all_reviewed_tsv_files, bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files = create_composer_file_lists(REPOS) 
     # Dict with composer name and their corresponding tsv files list
     composer_dict = {
         "Bach": bach_tsv_files,
-        # "Mozart": mozart_tsv_files,
+        "Mozart": mozart_tsv_files,
         # "Beethoven": beethoven_tsv_files,
         # "Chopin": chopin_tsv_files,
         # "Liszt": liszt_tsv_files,
@@ -109,6 +80,8 @@ def myself():
             global_all_prog_counts += all_root_prog_transition_counts(df)
 
             # 7/2/26
+            # Uri's system
+
             # -----------------------------
             ### End of operations per Piece
         
@@ -121,13 +94,15 @@ def myself():
         cond_probs = get_cond_probs(global_simple_prog_counts)
         uncond_probs = get_uncond_probs(global_simple_prog_counts)
         # FINE PROGRESSION PROBS
-        cond_probs_fine, uncond_probs_fine = get_fine_progression_matrix(composer, global_fine_prog_counts)
+        cond_probs_fine_uri, uncond_probs_fine_uri = get_fine_progression_matrix(composer, global_fine_prog_counts, categories=FINE_PROGRESSION_CATEGORIES_URI)
+        cond_probs_fine_martin, uncond_probs_fine_martin = get_fine_progression_matrix(composer, global_fine_prog_counts, categories=FINE_PROGRESSION_CATEGORIES_MARTIN)
+
         # ALL PROGRESSION PROBS
         cond_all_probs, uncond_all_probs = aggregate_root_progs(composer, global_all_prog_counts)
         diff_cats_trim = get_diff_categories_trimmed(global_all_prog_counts)
 
-        save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine, uncond_probs_fine, cond_all_probs, uncond_all_probs, diff_cats_trim)
-
+        save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine_uri, uncond_probs_fine_uri, cond_all_probs, uncond_all_probs, diff_cats_trim)
+        #save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine_martin, uncond_probs_fine_martin, cond_all_probs, uncond_all_probs, diff_cats_trim)
         # Output to .csv
         for df,name in [(prog_percentage_per_composer, "piece_counts"),
             (composer_prog_percentages, "composer_prog_percentages"),
@@ -144,8 +119,8 @@ def myself():
         (composer_prog_type_dist_df, "composer_prog_type_dist_df"),
         (composer_prog_type_trans_df, "composer_prog_type_trans_df"),
         (aggregate_composer_progs, "aggregate_composer_progs"),
-        (aggregate_composer_prog_transitions, "aggregate_composer_prog_transitions"),
-        ]:
+        (aggregate_composer_prog_transitions, "aggregate_composer_prog_transitions")
+            ]:
         make_csv(df, f"{name}")
 
 if __name__ == "__main__":
