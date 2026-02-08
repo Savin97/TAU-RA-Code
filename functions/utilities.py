@@ -47,6 +47,17 @@ def create_composer_file_lists(repos):
             liszt_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
     return all_reviewed_tsv_files, bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files
 
+from fractions import Fraction
+import numpy as np
+
+def frac_to_float(value):
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return np.nan
+    s = str(value).strip()
+    if s == "":
+        return np.nan
+    return float(Fraction(s))  # handles "0", "3/8", "12/8", etc.
+
 def get_diff_categories_trimmed(global_all_prog_counts):
     # --- TRIM USING COUNTS (not probabilities) ---
     row_ct = global_all_prog_counts.sum(axis=1)
@@ -97,5 +108,7 @@ def classify_movement_fine(diff):
         return "S_chr"
     elif diff in {7, 8, 9, -6, -7, -9, -10}:
         return "WA_chr"
+    elif diff in {0, -0}:
+        return "I"
     else:
         return "!"

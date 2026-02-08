@@ -8,7 +8,7 @@ from config import (SIMPLE_PROGRESSION_CATEGORIES,
                     FINE_PROGRESSION_MAP, 
                     FINE_PROGRESSION_LABELS,
                     ROOT_DIFF_VALUES)
-from visualization import plot_progression_heatmap
+from functions.visualization import plot_progression_heatmap
 
 def load_tsv(score):
     """ Simple loader for reviewed tsv files """

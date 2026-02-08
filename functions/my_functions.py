@@ -9,8 +9,8 @@ from config import (ALL_PROG_CATEGORIES,
                     ALL_PROGRESSION_VALUES_URI,
                     ALL_PROGRESSION_VALUES_MARTIN)
 
-from utilities import classify_movement_SAWI, classify_movement_fine
-from visualization import plot_progression_heatmap
+from functions.utilities import classify_movement_SAWI, classify_movement_fine
+from functions.visualization import plot_progression_heatmap
 
 def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_CATEGORIES_URI) -> pd.Series:
     """
@@ -231,7 +231,6 @@ def fine_progression_transition_counts(df: pd.DataFrame,
 
 
 def get_fine_progression_matrix(composer: str, global_fine_prog_counts, categories = FINE_PROGRESSION_CATEGORIES_URI):
-    labels = list(categories)
     # for score in reviewed_tsv_files:
     #     df = load_tsv(score)
     #     dfp = root_progression(df)
@@ -245,8 +244,8 @@ def get_fine_progression_matrix(composer: str, global_fine_prog_counts, categori
     total = global_fine_prog_counts.to_numpy().sum()
     uncond = (global_fine_prog_counts / total) if total else global_fine_prog_counts.astype(float)
 
-    plot_progression_heatmap(f"{composer}_FINE_COND", cond, categories=labels)
-    plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond, categories=labels)
+    plot_progression_heatmap(f"{composer}_FINE_COND", cond, categories=list(categories))
+    plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond, categories=list(categories))
 
     return cond, uncond
 
@@ -300,7 +299,7 @@ def aggregate_root_progs(composer: str, global_all_prog_counts):
 
     Uses plot_progression_heatmap for visualization.
     """
-    from visualization import plot_progression_heatmap
+    from functions.visualization import plot_progression_heatmap
 
 
     # for score in reviewed_tsv_files:
