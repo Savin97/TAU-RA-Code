@@ -13,13 +13,13 @@ ALL_PROGRESSION_VALUES_MARTIN = tuple( range(-10,11) )
 
 # Variables
 REPOS = [
-        "bach_en_fr_suites",
+        #"bach_en_fr_suites",
         "bach_solo",
-        "beethoven_piano_sonatas",
-        "ABC",
-        "chopin_mazurkas",
-        "mozart_piano_sonatas",
-        "liszt_pelerinage"
+        #"beethoven_piano_sonatas",
+        #"ABC",
+        #"chopin_mazurkas",
+        #"mozart_piano_sonatas",
+        #"liszt_pelerinage"
     ]
 
 UNNECESSARY_COLS = ["mn", 

@@ -84,13 +84,13 @@ def main():
 
         for tsv in tsv_files:
             score = Path(tsv).stem.removesuffix("_reviewed")
+            tsv = Path("sanity.csv")
             df = load_tsv(tsv)
             """ Operations per Piece here """
             features = [
                 convert_frac_cols_to_float,
                 drop_unnecessary_columns,
                 add_root_diff, 
-                uri_system_filter,
                 add_root_progression_type_simple, 
                 add_root_progression_type_fine, 
                 add_annotation_duration,
@@ -107,9 +107,10 @@ def main():
             piece_prog_type_trans_rows.append({"composer": composer, "piece": score, **piece_prog_type_trans.to_dict()})
             prog_count_per_piece_per_composer.append(build_progression_count_per_piece(Path(tsv), df, composer))
             global_simple_prog_counts += row_normalized_progression_probs(df,categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
-            global_fine_prog_counts += fine_progression_transition_counts(df)
+            #global_fine_prog_counts += fine_progression_transition_counts(df)
             global_all_prog_counts += all_root_prog_transition_counts(df)
-
+            df.to_csv("sanity_df.csv", index=False)  # Debug: check the processed DataFrame for one piece
+            exit()
             # 8/2/26
             # Uri's system
             piece_sums = (

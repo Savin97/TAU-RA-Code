@@ -151,8 +151,8 @@ def save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine, uncond_pr
     plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond_probs_fine, categories=FINE_PROGRESSION_CATEGORIES_URI)
     plot_progression_heatmap(f"{composer}_DIFF_COND", cond_trim, categories=diff_cats_trim)
     plot_progression_heatmap(f"{composer}_DIFF_UNCOND", uncond_trim, categories=diff_cats_trim)
-    plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_URI", weight_uncond_probs, categories=ALL_PROGRESSION_VALUES_URI, kind="joint", debug=True)
-    plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_MARTIN", uncond_weight_joint_martin, categories=ALL_PROGRESSION_VALUES_MARTIN, kind="joint", debug=True)
+    #plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_URI", weight_uncond_probs, categories=ALL_PROGRESSION_VALUES_URI, kind="joint", debug=True)
+    plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_MARTIN", uncond_weight_joint_martin, categories=ALL_PROGRESSION_VALUES_MARTIN, kind="joint")
 
 
 
