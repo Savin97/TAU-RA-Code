@@ -4,12 +4,10 @@ from pathlib import Path
 from config import (ALL_PROG_CATEGORIES,
                     SIMPLE_PROGRESSION_CATEGORIES_URI,
                     SIMPLE_PROGRESSION_CATEGORIES_MARTIN,
-                    FINE_PROGRESSION_CATEGORIES_URI,
-                    FINE_PROGRESSION_CATEGORIES_MARTIN,
                     ALL_PROGRESSION_VALUES_URI,
                     ALL_PROGRESSION_VALUES_MARTIN)
 
-from functions.utilities import classify_movement_SAWI, classify_movement_fine
+from functions.utilities import classify_movement_SAWI
 from functions.visualization import plot_progression_heatmap
 
 def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_CATEGORIES_URI) -> pd.Series:
@@ -19,13 +17,6 @@ def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_C
     if labels == SIMPLE_PROGRESSION_CATEGORIES_URI:
         counts = (
             df["progression_type_simple"]
-            .value_counts()
-            .reindex(labels, fill_value=0)
-            .astype(int)
-        )
-    else:
-        counts = (
-            df["progression_type_fine"]
             .value_counts()
             .reindex(labels, fill_value=0)
             .astype(int)
@@ -143,8 +134,6 @@ def piece_progression_type_distribution(df, score, labels = SIMPLE_PROGRESSION_C
     """
     if labels == SIMPLE_PROGRESSION_CATEGORIES_URI:
         total_prog_strength_counts = df["progression_type_simple"].dropna()
-    elif labels == FINE_PROGRESSION_CATEGORIES_URI:
-        total_prog_strength_counts = df["progression_type_fine"].dropna()
 
     # 2 columns: counts of all prog types for this piece
     counts = total_prog_strength_counts.value_counts()
@@ -179,17 +168,17 @@ def piece_prog_transition_unconditional(df, score, categories=SIMPLE_PROGRESSION
     return out
 
 
-def build_composer_prog_dist_df(piece_prog_dist_rows:list):
-    dist_df = pd.DataFrame(piece_prog_dist_rows)
+def build_composer_prog_dist_df(piece_prog_type_dist_rows):
+    composer_prog_type_dist_df = pd.DataFrame(piece_prog_type_dist_rows)
     # nicer column order
-    dist_cols = ["composer", "piece"] + [c for c in ALL_PROG_CATEGORIES if c in dist_df.columns]
-    dist_df = dist_df.reindex(columns=dist_cols)
-    return dist_df
+    dist_cols = ["composer", "piece"] + [c for c in ALL_PROG_CATEGORIES if c in composer_prog_type_dist_df.columns]
+    composer_prog_type_dist_df = composer_prog_type_dist_df.reindex(columns=dist_cols)
+    return composer_prog_type_dist_df
     
-def build_composer_prog_trans_df(prog_trans_rows):
-    trans_df = pd.DataFrame(prog_trans_rows)
-    trans_df = trans_df.fillna(0.0)
-    return trans_df
+def build_composer_prog_trans_df(piece_prog_type_trans_rows):
+    composer_prog_type_trans_df = pd.DataFrame(piece_prog_type_trans_rows)
+    composer_prog_type_trans_df = composer_prog_type_trans_df.fillna(0.0)
+    return composer_prog_type_trans_df
 
 
 def aggregate_progression_distribution(dist_df: pd.DataFrame, labels=SIMPLE_PROGRESSION_CATEGORIES_URI):
@@ -205,49 +194,14 @@ def aggregate_progression_distribution(dist_df: pd.DataFrame, labels=SIMPLE_PROG
 def aggregate_prog_transition_unconditional(trans_df: pd.DataFrame):
     """
         Composer-level average of per-piece unconditional transition distributions (equal weight per piece).
+        trans_df is of format
+            composer                  piece      S->S      S->A      S->W      A->S      A->A      A->W      W->S      W->A      W->W
+        0     Bach      BWV806_01_Prelude  0.292517  0.095238  0.149660  0.142857  0.115646  0.020408  0.108844  0.068027  0.006803
+        1     Bach    BWV806_02_Allemande  0.490196  0.166667  0.049020  0.166667  0.078431  0.000000  0.049020  0.000000  0.000000
     """
     trans_cols = [c for c in trans_df.columns if c not in ("composer", "piece")]
     agg = trans_df.groupby("composer")[trans_cols].mean()
     return agg
-
-# -------------------------------------------------------------------
-# Fine progression transition matrix (S_dia, WA_dia, S_chr, WA_chr)
-# -------------------------------------------------------------------
-
-def fine_progression_transition_counts(df: pd.DataFrame,
-                                       col: str = "progression_type_fine",
-                                       labels = list(FINE_PROGRESSION_CATEGORIES_URI)) -> pd.DataFrame:
-
-    cur = df[col].shift(0)
-    nxt = df[col].shift(-1)
-
-    tmp = pd.DataFrame({"cur": cur, "nxt": nxt}).dropna()
-
-    counts = pd.crosstab(tmp["cur"], tmp["nxt"])
-
-    # enforce full 5x5 order even if some missing
-    counts = counts.reindex(index=labels, columns=labels, fill_value=0)
-    return counts
-
-
-def get_fine_progression_matrix(composer: str, global_fine_prog_counts, categories = FINE_PROGRESSION_CATEGORIES_URI):
-    # for score in reviewed_tsv_files:
-    #     df = load_tsv(score)
-    #     dfp = root_progression(df)
-
-    #     # if you didn't add dfp["fine_prog"] inside root_progression, do it here:
-    #     if "fine_prog" not in dfp.columns:
-    #         dfp["fine_prog"] = dfp["root_change"].map(classify_root_movement_classic_fine)
-
-    cond = global_fine_prog_counts.div(global_fine_prog_counts.sum(axis=1), axis=0).fillna(0.0)
-
-    total = global_fine_prog_counts.to_numpy().sum()
-    uncond = (global_fine_prog_counts / total) if total else global_fine_prog_counts.astype(float)
-
-    plot_progression_heatmap(f"{composer}_FINE_COND", cond, categories=list(categories))
-    plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond, categories=list(categories))
-
-    return cond, uncond
 
 # -------------------------------------------------------------------
 # Root-change (diff value) transition matrix (requested 21x21)
@@ -307,8 +261,6 @@ def aggregate_root_progs(composer: str, global_all_prog_counts):
     #     dfp = root_progression(df)
     #     global_counts += all_root_prog_transition_counts(dfp, diffs=diffs)
 
-    cond = global_all_prog_counts.div(global_all_prog_counts.sum(axis=1), axis=0).fillna(0.0)
-
     total = global_all_prog_counts.to_numpy().sum()
     uncond = (global_all_prog_counts / total) if total else global_all_prog_counts.astype(float)
 
@@ -323,9 +275,8 @@ def aggregate_root_progs(composer: str, global_all_prog_counts):
     cats_trim = counts_trim.index.tolist()
 
     # recompute probs from trimmed counts
-    cond_trim = counts_trim.div(counts_trim.sum(axis=1), axis=0).fillna(0.0)
 
     total = counts_trim.to_numpy().sum()
     uncond_trim = (counts_trim / total) if total else counts_trim.astype(float)
 
-    return cond_trim, uncond_trim
+    return uncond_trim

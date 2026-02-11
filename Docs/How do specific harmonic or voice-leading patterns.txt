@@ -1,5 +1,0 @@
-How do specific harmonic or voice-leading patterns evolve across historical periods or genres within the corpus?
-
-To what extent do annotated analytical categories remain stable across different annotators, composers, or notational traditions?
-
-Another line of inquiry concerns the relationship between local musical events and large-scale formal structure, and whether corpus data can help predict formal functions based on surface features alone.

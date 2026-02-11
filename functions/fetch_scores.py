@@ -1,6 +1,8 @@
 import requests
 from pathlib import Path
 
+from config import REPOS
+
 GITHUB_API = "https://api.github.com/repos/DCMLab"
 
 
@@ -33,3 +35,7 @@ def download_reviewed_folder(repo_name, target_root="scores"):
             filename.write_bytes(file_data)
 
     print(f"{repo_name}: done")
+
+def download_scores():
+    for repo in REPOS:
+        download_reviewed_folder(repo)

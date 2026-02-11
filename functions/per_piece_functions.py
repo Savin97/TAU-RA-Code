@@ -1,5 +1,5 @@
 from config import UNNECESSARY_COLS
-from functions.utilities import classify_movement_SAWI, classify_movement_fine, frac_to_float
+from functions.utilities import classify_movement_SAWI, frac_to_float
 
 def drop_unnecessary_columns(df):
     return df.drop(columns=UNNECESSARY_COLS, errors="ignore")
@@ -20,9 +20,6 @@ def add_root_progression_type_simple(df):
     df["progression_type_simple"] = df["root_diff"].apply(classify_movement_SAWI)
     return df
 
-def add_root_progression_type_fine(df):
-    df["progression_type_fine"] = df["root_diff"].apply(classify_movement_fine)
-    return df
 
 def add_annotation_duration(df):
     df["annotation_dur"] = ( 
@@ -59,3 +56,4 @@ def rootdiff_progweight_sum_table(df) :
           .reset_index(drop=True)
     )
     return out
+

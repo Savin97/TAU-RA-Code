@@ -110,24 +110,6 @@ def composer_percentages_from_piece_counts(piece_counts_df, labels=SIMPLE_PROGRE
     return pct[["n"] + list(labels)]
 
 
-def classify_root_movement_classic_fine(diff):
-    """
-    Fine classification that partitions the (mod-12) root movements into:
-
-      Sdia, WAdia, Schr, WAchr, identical
-
-    Returns "!" for unexpected/invalid values (including values outside -10..10).
-    """
-    if pd.isna(diff):
-        return np.nan
-
-    diff = int(diff)
-
-    for label, s in FINE_PROGRESSION_MAP.items():
-        if diff in s:
-            return label
-    return "!" # should never happen
-
 
 def root_progression(df):
     """

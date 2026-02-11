@@ -51,3 +51,13 @@ def rootdiff_bigram_weight_matrix(df: pd.DataFrame) -> pd.DataFrame:
 def row_normalize_prog_weight_matrix(mat: pd.DataFrame) -> pd.DataFrame:
     denom = mat.sum(axis=1).replace(0, 1.0)
     return mat.div(denom, axis=0)
+
+def unconditional_joint_probs(mat: pd.DataFrame) -> pd.DataFrame:
+    """
+        Converts a weighted transition matrix into unconditional joint probabilities
+        that sum to 1 across the whole matrix.
+    """
+    total = float(mat.to_numpy().sum())
+    if total == 0.0:
+        return mat.astype(float)  # all zeros; nothing to normalize
+    return mat.astype(float) / total

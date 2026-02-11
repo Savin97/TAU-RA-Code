@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from config import ALL_PROGRESSION_VALUES_MARTIN, SIMPLE_PROGRESSION_CATEGORIES_URI, FINE_PROGRESSION_CATEGORIES_URI , ALL_PROGRESSION_VALUES_URI, OUTPUT_PATH
+from config import ALL_PROGRESSION_VALUES_MARTIN, SIMPLE_PROGRESSION_CATEGORIES_URI , ALL_PROGRESSION_VALUES_URI, OUTPUT_PATH
 
 def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
     ann_threshold=0.01   # only label cells >= this
@@ -46,9 +46,7 @@ def plot_progression_heatmap(composer, transition_probs, categories, vmax=None):
 import numpy as np
 import matplotlib.pyplot as plt
 from config import (
-    ALL_PROGRESSION_VALUES_MARTIN,
     SIMPLE_PROGRESSION_CATEGORIES_URI,
-    FINE_PROGRESSION_CATEGORIES_URI,
     ALL_PROGRESSION_VALUES_URI,
     OUTPUT_PATH,
 )
@@ -143,42 +141,8 @@ def plot_progression_heatmap_modified(
     plt.close()
 
 
-def save_heatmaps(composer, cond_probs, uncond_probs, cond_probs_fine, uncond_probs_fine, cond_trim, uncond_trim, diff_cats_trim, weight_uncond_probs, uncond_weight_joint_martin):
+def save_heatmaps(composer, uncond_probs, uncond_trim, diff_cats_trim, weight_uncond_probs):
     # Save heatmaps for progression probabilities
-    plot_progression_heatmap(f"{composer}_COND", cond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
-    plot_progression_heatmap(f"{composer}_UNCOND", uncond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
-    plot_progression_heatmap(f"{composer}_FINE_COND", cond_probs_fine, categories=FINE_PROGRESSION_CATEGORIES_URI)
-    plot_progression_heatmap(f"{composer}_FINE_UNCOND", uncond_probs_fine, categories=FINE_PROGRESSION_CATEGORIES_URI)
-    plot_progression_heatmap(f"{composer}_DIFF_COND", cond_trim, categories=diff_cats_trim)
-    plot_progression_heatmap(f"{composer}_DIFF_UNCOND", uncond_trim, categories=diff_cats_trim)
+    plot_progression_heatmap(f"{composer}_SAW_URI", uncond_probs, categories=SIMPLE_PROGRESSION_CATEGORIES_URI)
+    plot_progression_heatmap(f"{composer}_DIFF_URI", uncond_trim, categories=diff_cats_trim)
     #plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_URI", weight_uncond_probs, categories=ALL_PROGRESSION_VALUES_URI, kind="joint", debug=True)
-    plot_progression_heatmap_modified(f"{composer}_WEIGHT_UNCOND_MARTIN", uncond_weight_joint_martin, categories=ALL_PROGRESSION_VALUES_MARTIN, kind="joint")
-
-
-
-# def composer_progression_percentage_heatmap(df_plot, label_cols= PROGRESSION_CATEGORIES):
-#     # Heatmap (composers x labels) with annotations
-#     data = df_plot[label_cols].to_numpy()
-#     composers = df_plot["composer"].tolist()
-
-#     fig, ax = plt.subplots(figsize=(6.8, 4.6))
-#     im = ax.imshow(data, aspect="auto")
-
-#     ax.set_xticks(np.arange(len(label_cols)))
-#     ax.set_xticklabels(label_cols)
-#     ax.set_yticks(np.arange(len(composers)))
-#     ax.set_yticklabels(composers)
-
-#     ax.set_title("Progression label shares (heatmap)")
-#     cbar = fig.colorbar(im, ax=ax)
-#     cbar.set_label("Share (0..1)")
-
-#     # annotate each cell
-#     for i in range(data.shape[0]):
-#         for j in range(data.shape[1]):
-#             ax.text(j, i, f"{data[i, j]*100:.1f}%", ha="center", va="center", fontsize=9)
-
-#     plt.tight_layout()
-
-#     out2 = Path("output/composer_progression_heatmap.png")
-#     fig.savefig(out2, dpi=210)
