@@ -1,3 +1,6 @@
+# functions/per_piece_functions.py
+import pandas as pd
+
 from config import UNNECESSARY_COLS
 from functions.utilities import classify_movement_SAWI, frac_to_float
 
@@ -23,18 +26,18 @@ def add_root_progression_type_simple(df):
 
 def add_annotation_duration(df):
     df["annotation_dur"] = ( 
-        ( ( df["mc_onset_numeric"] - df["mc_onset_numeric"].shift(1) )
-        + ( df["mc"] - df["mc"].shift(1) ) ) 
+        ( ( df["mc_onset_numeric"].shift(-1) - df["mc_onset_numeric"] )
+        + ( df["mc"].shift(-1) - df["mc"] ) ) 
         * df["timesig_numeric"]
     )
     return df
 
 def add_prog_weight(df):
-    df["prog_weight"] = df["annotation_dur"] + df["annotation_dur"].shift(-1)
+    df["prog_weight"] = df["annotation_dur"].shift(1) + df["annotation_dur"]
     return df
 
 def add_bigram_weight(df):
-    df["bigram_weight"] = df["prog_weight"] + df["prog_weight"].shift(1)
+    df["bigram_weight"] = df["prog_weight"].shift(1) + df["prog_weight"]
     return df
 
 def uri_system_filter(df):
@@ -57,3 +60,12 @@ def rootdiff_progweight_sum_table(df) :
     )
     return out
 
+def add_proper_empty_last_row(df):
+    special_row = pd.DataFrame([{
+        "mc": df["mc"].iloc[-1] + 1,
+        "mc_onset": 0,
+        "timesig": df["timesig"].iloc[-1]
+    }])
+    df = pd.concat([df, special_row], ignore_index=True)
+
+    return df

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from pathlib import Path
 
 from config import (ALL_PROG_CATEGORIES,
@@ -38,14 +39,14 @@ def build_progression_count_per_piece( tsv_path: Path, df, composer):
         
 
 def piece_percentages_from_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES_URI):
-            """
-                Derive piece-level percentages from piece-level counts (no recompute).
-            """
-            out = piece_counts_df.copy()
-            denom = out["n"].replace(0, pd.NA)
-            for lab in labels:
-                out[lab] = (out[lab] / denom).fillna(0.0)
-            return out
+    """
+        Derive piece-level percentages from piece-level counts (no recompute).
+    """
+    out = piece_counts_df.copy()
+    denom = out["n"].replace(0, pd.NA)
+    for lab in labels:
+        out[lab] = (out[lab] / denom).fillna(0.0)
+    return out
 
 def composer_percentages_from_piece_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES_URI):
     """
@@ -90,7 +91,7 @@ def count_prog_type_per_composer(df, categories = SIMPLE_PROGRESSION_CATEGORIES_
     return transition_counts
 
 
-def row_normalized_progression_probs(df, categories=SIMPLE_PROGRESSION_CATEGORIES_URI):
+def get_simple_prog_probs_row_normalized(df, categories=SIMPLE_PROGRESSION_CATEGORIES_URI):
     """
         Compute:
         - total counts of each category using count_prog_type_per_composer
@@ -101,12 +102,7 @@ def row_normalized_progression_probs(df, categories=SIMPLE_PROGRESSION_CATEGORIE
         Returns (total_counts, transition_counts, transition_probs)
     """
     transition_counts = count_prog_type_per_composer(df, categories)
-
-    # Row-normalized probabilities
-    transition_probs = transition_counts.div(
-        transition_counts.sum(axis=1), axis=0
-    )
-
+    transition_probs = transition_counts.div(transition_counts.sum(axis=1), axis=0).fillna(0.0)
     return transition_probs
 
 def get_cond_probs(global_transition_counts):
@@ -118,7 +114,7 @@ def get_cond_probs(global_transition_counts):
 
 def get_uncond_probs(global_transition_counts):
         # Unconditional Probabilities - sums to 1 over all cells
-    total_transitions = global_transition_counts.to_numpy().sum()
+    total_transitions = float(np.nansum(global_transition_counts.to_numpy()))
     uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
     return uncond_probs
 
