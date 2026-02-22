@@ -1,9 +1,10 @@
 #main.py
-from pipeline.uri_pipeline import run_uri_pipeline
+from pipeline.pipeline import run_pipeline
 
 def main():
     print("\nStarting execution...\n--------------------")
-    run_uri_pipeline()
+    run_pipeline(system="uri")
+    run_pipeline(system="martin")
     print("--------------------\nExecution Complete.")
 
 if __name__ == "__main__":

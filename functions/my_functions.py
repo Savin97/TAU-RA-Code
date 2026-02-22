@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from pathlib import Path
 
 from config import (ALL_PROG_CATEGORIES,
                     SIMPLE_PROGRESSION_CATEGORIES_URI,
@@ -8,32 +7,28 @@ from config import (ALL_PROG_CATEGORIES,
                     ALL_PROGRESSION_VALUES_URI,
                     ALL_PROGRESSION_VALUES_MARTIN)
 
-from functions.utilities import classify_movement_SAWI
-from functions.visualization import plot_progression_heatmap
-
 def progression_type_count_per_piece(tsv_path, df, labels = SIMPLE_PROGRESSION_CATEGORIES_URI) -> pd.Series:
     """
         Returns raw counts of progression_type labels for ONE TSV.
     """
-    if labels == SIMPLE_PROGRESSION_CATEGORIES_URI:
-        counts = (
-            df["progression_type_simple"]
-            .value_counts()
-            .reindex(labels, fill_value=0)
-            .astype(int)
-        )
+    counts = (
+        df["progression_type_simple"]
+        .value_counts()
+        .reindex(labels, fill_value=0)
+        .astype(int)
+    )
     if tsv_path != None:
         counts.name = tsv_path.stem
     return counts
 
 
-def build_progression_count_per_piece( tsv_path: Path, df, composer):
+def build_progression_count_per_piece( tsv_path, df, composer, labels):
         """
             Returns 1 table: raw counts per piece.
             rows: pieces
             cols: composer, piece, n,A,S,W,I
         """
-        counts = progression_type_count_per_piece(tsv_path, df)
+        counts = progression_type_count_per_piece(tsv_path, df, labels)
         row = {"composer": composer, "piece": tsv_path.stem, "n": int(counts.sum()), **counts.to_dict()}
         return row
         
@@ -48,7 +43,7 @@ def piece_percentages_from_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CAT
         out[lab] = (out[lab] / denom).fillna(0.0)
     return out
 
-def composer_percentages_from_piece_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES_URI):
+def composer_percentages_from_prog_counts(piece_counts_df, labels=SIMPLE_PROGRESSION_CATEGORIES_URI):
     """
         Weighted composer-level percentages:
         sum counts across pieces -> normalize.
@@ -123,23 +118,18 @@ def piece_progression_type_distribution(df, score, labels = SIMPLE_PROGRESSION_C
         Returns a Series with percentages of each progression type label for ONE piece.
         Index = labels, values = percentages (0..1).
         sample output:
-        S    81
-        I    41
-        A    41
-        W    27
+        S    0.54
+        I    0.28
+        W    0.18
     """
-    if labels == SIMPLE_PROGRESSION_CATEGORIES_URI:
-        total_prog_strength_counts = df["progression_type_simple"].dropna()
-
+    total_prog_strength_counts = df["progression_type_simple"].dropna()
     # 2 columns: counts of all prog types for this piece
     counts = total_prog_strength_counts.value_counts()
     # ensure all labels exist
     counts = counts.reindex(labels, fill_value=0)
-
     total = counts.sum()
     if total == 0:
         return pd.Series({lab: 0.0 for lab in labels}, name=str(score))
-
     return (counts / total).rename(str(score))
 
 def piece_prog_transition_unconditional(df, score, categories=SIMPLE_PROGRESSION_CATEGORIES_URI) -> pd.Series:
@@ -162,7 +152,6 @@ def piece_prog_transition_unconditional(df, score, categories=SIMPLE_PROGRESSION
     out.index = [f"{i}->{j}" for (i, j) in out.index]
     out.name = str(score)
     return out
-
 
 def build_composer_prog_dist_df(piece_prog_type_dist_rows):
     composer_prog_type_dist_df = pd.DataFrame(piece_prog_type_dist_rows)
@@ -203,28 +192,32 @@ def aggregate_prog_transition_unconditional(trans_df: pd.DataFrame):
 # Root-change (diff value) transition matrix (requested 21x21)
 # -------------------------------------------------------------------
 
-def all_root_prog_transition_counts(df: pd.DataFrame) -> pd.DataFrame:
+def all_root_prog_transition_counts(df: pd.DataFrame, system) -> pd.DataFrame:
     """
         Build a transition-count matrix of root_change -> next root_change.
-
         This is different from the S/W/A categorization: it uses the *raw* diff values.
-
         By default it returns a 21x21 matrix over {-10..-1, 1..10} (excludes 0).
     """
+    if system == "uri":
+        all_prog_values = ALL_PROGRESSION_VALUES_URI
+    elif system == "martin":
+        all_prog_values = ALL_PROGRESSION_VALUES_MARTIN
+    else:
+        raise ValueError("Invalid System")
     root_diff = df["root_diff"].dropna().astype(int)
     
     # keep only the diffs we want (default excludes 0)
-    root_diff = root_diff[root_diff.isin(ALL_PROGRESSION_VALUES_URI)]
+    root_diff = root_diff[root_diff.isin(all_prog_values)]
     next_diff = root_diff.shift(-1) # type: ignore
-    next_diff = next_diff[next_diff.isin(ALL_PROGRESSION_VALUES_URI)]
+    next_diff = next_diff[next_diff.isin(all_prog_values)]
     counts = (
         pd.crosstab(root_diff.loc[next_diff.index], next_diff) # type: ignore
-        .reindex(index=ALL_PROGRESSION_VALUES_URI, columns=ALL_PROGRESSION_VALUES_URI, fill_value=0)
+        .reindex(index=all_prog_values, columns=all_prog_values, fill_value=0)
         .astype(int)
     )
     return counts
 
-def root_prog_transition_probs(df: pd.DataFrame, diffs=ALL_PROGRESSION_VALUES_URI, row_normalize: bool = True) -> pd.DataFrame:
+def root_prog_transition_probs(df: pd.DataFrame, row_normalize: bool = True) -> pd.DataFrame:
     """
         Convert all_root_prog_transition_counts into probabilities.
         If row_normalize=True: P(next_diff | current_diff) (rows sum to 1).
@@ -240,23 +233,12 @@ def root_prog_transition_probs(df: pd.DataFrame, diffs=ALL_PROGRESSION_VALUES_UR
 
     return probs
 
-def aggregate_root_progs(composer: str, global_all_prog_counts):
+def aggregate_root_progs(global_all_prog_counts):
     """
-    Aggregate (sum) root-change transition counts across many TSVs and plot both:
-
-      - conditional matrix (rows sum to 1)
-      - unconditional matrix (all cells sum to 1)
-
-    Uses plot_progression_heatmap for visualization.
+        Aggregate (sum) root-change transition counts across many TSVs and plot both:
+        - conditional matrix (rows sum to 1)
+        - unconditional matrix (all cells sum to 1)
     """
-    from functions.visualization import plot_progression_heatmap
-
-
-    # for score in reviewed_tsv_files:
-    #     df = load_tsv(score)
-    #     dfp = root_progression(df)
-    #     global_counts += all_root_prog_transition_counts(dfp, diffs=diffs)
-
     total = global_all_prog_counts.to_numpy().sum()
     uncond = (global_all_prog_counts / total) if total else global_all_prog_counts.astype(float)
 
@@ -269,7 +251,6 @@ def aggregate_root_progs(composer: str, global_all_prog_counts):
 
     counts_trim = global_all_prog_counts.loc[keep, keep]
     cats_trim = counts_trim.index.tolist()
-
     # recompute probs from trimmed counts
 
     total = counts_trim.to_numpy().sum()

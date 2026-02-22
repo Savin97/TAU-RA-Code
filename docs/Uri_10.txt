@@ -1,5 +1,5 @@
-0. Make martin's pipeline the primary one
-1. When plotting graphs, true 0 values should be grayed out.
+V 0. Make martin's pipeline the primary one
+V 1. When plotting graphs, true 0 values should be grayed out.
 2. Dont pass static categories, use root_diff_weight_df.csv 
 to get all possible progressions for the graph axes
 3. Make trigrams - groups of 3 root_diffs. Only take the 10 most common vectors. They will look like (-1,-1,-1) where the values of the vector are root_diff.

@@ -1,6 +1,8 @@
 import pandas as pd
 from pathlib import Path
 import numpy as np
+from fractions import Fraction
+
 
 from config import ROOT_PATH
 
@@ -9,7 +11,7 @@ def load_tsv(score):
     # return pd.read_csv(f"{score}_reviewed.tsv", sep="\t")
     return pd.read_csv(score, sep="\t")
 
-def make_csv(df, filename, path_modifier):
+def make_csv(df, filename, system, path_modifier):
     # Add a leading apostrophe to columns that might be misinterpreted by Excel
     # So they dont show as dates
     excel_sensitive_cols = ["mc_onset", "mn_onset", "timesig"]
@@ -17,25 +19,27 @@ def make_csv(df, filename, path_modifier):
         if col in df.columns:
             df[col] = "'" + df[col].astype(str)
     if path_modifier == "piece":
-        df.to_csv(f"output/csv/per_piece/{filename}.csv", index=False)
+        df.to_csv(f"output/{system}/csv/per_piece/{filename}.csv", index=False)
     elif path_modifier == "composer":
-        df.to_csv(f"output/csv/per_composer/{filename}.csv", index=False)
+        df.to_csv(f"output/{system}/csv/per_composer/{filename}.csv", index=False)
     elif path_modifier == "global":
-        df.to_csv(f"output/csv/global/{filename}.csv", index=False)
+        df.to_csv(f"output/{system}/csv/global/{filename}.csv", index=False)
     else:
         raise ValueError ("Invalid path_modifier")
 
-def check_dirs():
+def check_dirs(system):
     base = Path("output")
-    (base / "img").mkdir(parents=True, exist_ok=True)
-    (base / "csv").mkdir(parents=True, exist_ok=True)
-    (base / "csv" / "per_piece").mkdir(parents=True, exist_ok=True)
-    (base / "csv" / "per_composer").mkdir(parents=True, exist_ok=True)
-    (base / "csv" / "global").mkdir(parents=True, exist_ok=True)
+    (base / system / "img").mkdir(parents=True, exist_ok=True)
+    (base / system /"csv").mkdir(parents=True, exist_ok=True)
+    (base / system /"csv" / "per_piece").mkdir(parents=True, exist_ok=True)
+    (base / system /"csv" / "per_composer").mkdir(parents=True, exist_ok=True)
+    (base / system /"csv" / "global").mkdir(parents=True, exist_ok=True)
+
 
 def create_composer_file_lists(repos):
     ROOT = Path(ROOT_PATH)
-    all_reviewed_tsv_files, bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files = [], [], [], [], [], []
+    
+    bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files = [], [], [], [], [], []
     # Loop through each repository and collect reviewed TSV files
     for repo in repos:
         reviewed_dir = ROOT / "scores" / repo / "reviewed"
@@ -54,9 +58,7 @@ def create_composer_file_lists(repos):
             mozart_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
         elif repo == "liszt_pelerinage":
             liszt_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
-    return all_reviewed_tsv_files, bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files
-
-from fractions import Fraction
+    return bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files
 
 def frac_to_float(value):
     if value is None or (isinstance(value, float) and np.isnan(value)):
@@ -69,7 +71,7 @@ def frac_to_float(value):
 def make_frac_not_show_as_date(df):
     pass
 
-def get_diff_categories_trimmed(global_all_prog_counts):
+def get_all_prog_categories_trimmed(global_all_prog_counts):
     # --- TRIM USING COUNTS (not probabilities) ---
     row_ct = global_all_prog_counts.sum(axis=1)
     col_ct = global_all_prog_counts.sum(axis=0)
@@ -78,6 +80,7 @@ def get_diff_categories_trimmed(global_all_prog_counts):
     keep = (row_ct + col_ct) > 0
     counts_trim = global_all_prog_counts.loc[keep, keep]
     cats_trim = counts_trim.index.tolist()
+    print(cats_trim)
     return cats_trim
 
 def classify_movement_SAWI(diff):

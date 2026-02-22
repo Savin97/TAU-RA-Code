@@ -69,3 +69,23 @@ def add_proper_empty_last_row(df):
     df = pd.concat([df, special_row], ignore_index=True)
 
     return df
+
+def simple_prog_transition_counts(df, categories, col="progression_type_simple"):
+    """
+        Return a |cats|x|cats| DataFrame of transition COUNTS:
+        rows = current, cols = next.
+    """
+    prog_type = df[col]
+    cur = prog_type
+    nxt = prog_type.shift(-1)
+
+    # keep only transitions where both sides are valid categories
+    mask = cur.isin(categories) & nxt.isin(categories)
+    cur = cur[mask]
+    nxt = nxt[mask]
+
+    mat = pd.crosstab(cur, nxt)
+
+    # force exact grid + order
+    mat = mat.reindex(index=list(categories), columns=list(categories), fill_value=0).astype(int)
+    return mat
