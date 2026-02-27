@@ -3,8 +3,9 @@ from pathlib import Path
 import numpy as np
 from fractions import Fraction
 
-
-from config import ROOT_PATH
+from config import (ROOT_PATH,
+                    SIMPLE_PROGRESSION_CATEGORIES_MARTIN,
+                    SIMPLE_PROGRESSION_CATEGORIES_URI)
 
 def load_tsv(score):
     """ Simple loader for reviewed tsv files """
@@ -35,10 +36,21 @@ def check_dirs(system):
     (base / system /"csv" / "per_composer").mkdir(parents=True, exist_ok=True)
     (base / system /"csv" / "global").mkdir(parents=True, exist_ok=True)
 
+def pick_categories_based_on_system_type(system):
+    if system == "martin":
+        simple_categories = SIMPLE_PROGRESSION_CATEGORIES_MARTIN
+        print("--------------------\nRunning Martin's pipeline...\n--------------------")
+    elif system == "uri":
+        simple_categories = SIMPLE_PROGRESSION_CATEGORIES_URI
+        print("--------------------\nRunning Uri's pipeline...\n--------------------")
+    else:
+        raise ValueError ("Invalid Pipeline System")
+    return simple_categories
+
+
 
 def create_composer_file_lists(repos):
     ROOT = Path(ROOT_PATH)
-    
     bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files = [], [], [], [], [], []
     # Loop through each repository and collect reviewed TSV files
     for repo in repos:
@@ -71,7 +83,7 @@ def frac_to_float(value):
 def make_frac_not_show_as_date(df):
     pass
 
-def get_all_prog_categories_trimmed(global_all_prog_counts):
+def get_SAWINONE_PROG_CATEGORIES_trimmed(global_all_prog_counts):
     # --- TRIM USING COUNTS (not probabilities) ---
     row_ct = global_all_prog_counts.sum(axis=1)
     col_ct = global_all_prog_counts.sum(axis=0)
@@ -80,7 +92,6 @@ def get_all_prog_categories_trimmed(global_all_prog_counts):
     keep = (row_ct + col_ct) > 0
     counts_trim = global_all_prog_counts.loc[keep, keep]
     cats_trim = counts_trim.index.tolist()
-    print(cats_trim)
     return cats_trim
 
 def classify_movement_SAWI(diff):

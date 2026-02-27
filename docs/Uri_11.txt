@@ -1,0 +1,6 @@
+1. Expand heatmaps for all composers.
+2. Check in the paper by Johannes for chronologies of the pieces or online/AI.
+Get the middle year for every composer's life.
+3. Make a chronological map of SAWI progressions for all composers.
+Try to identify chronoligcal tendencies in these distributions.
+5. For all composers - unigrams of SAWI and of ALL_Progs (How many S,A,W,I progressions for every composer? a percentage).

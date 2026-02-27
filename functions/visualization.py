@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from config import OUTPUT_PATH
 
-def plot_heatmap(
-    system,
+def plot_heatmap(system,
     composer: str,
     graph_title,
     filename:str,
@@ -12,7 +11,7 @@ def plot_heatmap(
     vmax=None,
     kind: str = "raw",   # "raw" | "row" | "joint",
     debug: bool = False
-):
+    ):
     """
     kind:
       - "raw":  no normalization assumption
@@ -66,7 +65,7 @@ def plot_heatmap(
     fig, ax = plt.subplots(figsize=(21, 21))
 
     zero_masked = np.ma.masked_where(data == 0.0, data)
-    cmap = plt.cm.Reds.copy() # Reds for normal values
+    cmap = plt.cm.Reds.copy() # Reds for normal values #type:ignore
     cmap.set_bad(color="lightgray")  # color for masked values (zeroes)
 
     im = ax.imshow(zero_masked, aspect="equal", cmap=cmap, vmin=0.0, vmax=vmax)
@@ -77,12 +76,6 @@ def plot_heatmap(
     ax.set_yticklabels(cats)
 
     ax.set_title(f"{composer} {graph_title}", fontsize=40)
-    # if categories == ALL_PROGRESSION_VALUES_URI:
-    #     ax.set_xlabel("Next progression (No. of 5ths)", fontsize=30)
-    #     ax.set_ylabel("Current progression (No. of 5ths)", fontsize=30)
-    # else:
-    #     ax.set_xlabel("Next progression", fontsize=30)
-    #     ax.set_ylabel("Current progression", fontsize=30)
 
     # Light grid
     ax.set_xticks(np.arange(-.5, len(cats), 1), minor=True)
@@ -93,42 +86,9 @@ def plot_heatmap(
 
     coords = np.argwhere(data >= ann_threshold)
     for (i, j) in coords:
-        ax.text(j, i, f"{data[i, j]:.3f}", ha="center", va="center", fontsize=20)
+        ax.text(j, i, f"{data[i, j]:.3f}", ha="center", va="center", fontsize=14)
 
     fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
     plt.tight_layout()
     plt.savefig(f"{OUTPUT_PATH}/{system}/img/{filename}.png")
     plt.close()
-
-
-# old plot_progression_heatmap
-# def plot_progression_heatmap(system, composer, transition_probs, categories, vmax=None):
-#     ann_threshold=0.005   # only label cells >= this
-#     cats = list(categories)
-   
-#     data = transition_probs.loc[cats, cats].to_numpy()
-#     vmax = np.max(data)
-#     if vmax <= 0:
-#         vmax = 1.0  # or return early with a warning
-#     fig, ax = plt.subplots(figsize=(21, 21))
-#     im = ax.imshow(data, aspect="equal", cmap="Reds", vmin=0.0, vmax=vmax)
-
-#     # Light grid for readability
-#     ax.set_xticks(np.arange(len(cats)))
-#     ax.set_yticks(np.arange(len(cats)))
-#     ax.set_xticklabels(cats)
-#     ax.set_yticklabels(cats)
-#     ax.grid(which="minor", linewidth=0.3)
-#     ax.set_title(f"{composer}", fontsize=40)
-#     ax.set_xticks(np.arange(-.5, len(cats), 1), minor=True)
-#     ax.set_yticks(np.arange(-.5, len(cats), 1), minor=True)
-#     ax.grid(which="minor", linewidth=0.3)
-#     ax.tick_params(which="minor", bottom=False, left=False)
-#     plt.tick_params(axis='both', labelsize=26)  # x + y ticks
-#     coords = np.argwhere(data >= ann_threshold)
-#     for (i, j) in coords:
-#             ax.text(j, i, f"{data[i, j]:.2f}", ha="center", va="center", fontsize=24)
-#     fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
-#     plt.tight_layout()
-#     plt.savefig(f"{OUTPUT_PATH}/{system}/img/{composer}.png")
-#     plt.close()

@@ -10,7 +10,7 @@ def download_reviewed_folder(repo_name, target_root="scores"):
     target_dir = Path(target_root) / repo_name / "reviewed"
 
     if target_dir.exists():
-        print(f"{repo_name}: already present")
+        #print(f"{repo_name}: already present")
         return
 
     target_dir.mkdir(parents=True, exist_ok=True)
