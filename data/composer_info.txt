@@ -1,0 +1,77 @@
+composer_mid_life_date = {
+    ('Bach', 1717)
+    ('Bartok', 1913)
+    ('Beethoven', 1798)
+    ('C.P.E. Bach', 1751)
+    ('Chopin', 1829)
+    ('Clara Schumann', 1857)
+    ('Corelli', 1683)
+    ('Couperin', 1700)
+    ('Debussy', 1890)
+    ('Dvorak', 1872)
+    ('Frescobaldi', 1613)
+    ('Grieg', 1875)
+    ('Handel', 1722)
+    ('J.C. Bach', 1758)
+    ('Kozeluh', 1782)
+    ('Liszt', 1848)
+    ('Mahler', 1885)
+    ('Medtner', 1915)
+    ('Mendelssohn', 1828)
+    ('Monteverdi', 1605)
+    ('Mozart', 1773)
+    ('Pergolesi', 1723)
+    ('Peri', 1597)
+    ('Pleyel', 1794)
+    ('Poulenc', 1931)
+    ('Rachmaninoff', 1908)
+    ('Ravel', 1906)
+    ('Scarlatti', 1721)
+    ('Schubert', 1812)
+    ('Schuetz', 1628)
+    ('Schulhoff', 1918)
+    ('Schumann', 1833)
+    ('Sweelinck', 1591)
+    ('Tchaikovsky', 1866)
+    ('W.F. Bach', 1747)
+    ('Wagner', 1848)
+}
+
+composer_birth_death_years = {
+    "C.P.E. Bach": (1714, 1788),
+    "W.F. Bach": (1710, 1784),
+    "J.C. Bach": (1735, 1782),
+    "Clara Schumann": (1819, 1896),
+    "Bach": (1685, 1750),
+    "Beethoven": (1770, 1827),
+    "Chopin": (1810, 1849),
+    "Liszt": (1811, 1886),
+    "Mozart": (1756, 1791),
+    "Bartók": (1881, 1945),
+    "Debussy": (1862, 1918),
+    "Dvořák": (1841, 1904),
+    "Frescobaldi": (1583, 1643),
+    "Grieg": (1843, 1907),
+    "Handel": (1685, 1759),
+    "Schuetz": (1585, 1672),
+    "Kozeluh": (1747, 1818),
+    "Mahler": (1860, 1911),
+    "Medtner": (1880, 1951),
+    "Mendelssohn": (1809, 1847),
+    "Monteverdi": (1567, 1643),
+    "Pergolesi": (1710, 1736),
+    "Peri": (1561, 1633),
+    "Pleyel": (1757, 1831),
+    "Poulenc": (1899, 1963),
+    "Rachmaninoff": (1873, 1943),
+    "Ravel": (1875, 1937),
+    "Scarlatti": (1685, 1757),
+    "Schubert": (1797, 1828),
+    "Schulhoff": (1894, 1942),
+    "Schumann": (1810, 1856),
+    "Sweelinck": (1562, 1621),
+    "Tchaikovsky": (1840, 1893),
+    "Wagner": (1813, 1883),
+    "Corelli": (1653, 1713),
+    "Couperin": (1668, 1733),
+}

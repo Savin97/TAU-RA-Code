@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 
-
 def rootdiff_bigram_weight_matrix(df: pd.DataFrame):
     """
     Returns a fixed (diff_max-diff_min+1) x (diff_max-diff_min+1) matrix:

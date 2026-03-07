@@ -3,38 +3,42 @@ import pandas as pd
 from pathlib import Path
 from collections import defaultdict, Counter
 from functions.fetch_scores import download_scores
-from functions.per_piece_functions import (add_annotation_duration, 
-                                           add_bigram_weight, 
-                                           add_prog_weight, 
-                                           add_root_diff, 
-                                           add_root_progression_type_simple,
-                                           convert_frac_cols_to_float, 
-                                           drop_unnecessary_columns, 
-                                           uri_system_filter,
-                                           add_proper_empty_last_row,
-                                           simple_prog_transition_counts,
-                                           build_progression_count_per_piece,
-                                           count_weighted_root_diffs)
-from functions.per_composer_functions import (rootdiff_bigram_weight_matrix,
-                                              unconditional_joint_probs,
-                                              composer_percentages_from_prog_counts,
-                                              piece_prog_transition_unconditional,
-                                              build_all_progs_weighted_matrix)
-from functions.my_functions import (aggregate_prog_transition_unconditional,
-                                    all_root_prog_transition_counts, 
-                                    build_composer_prog_trans_df,
-                                    get_uncond_probs,
-                                    piece_progression_type_distribution,
-                                    aggregate_progression_distribution,
-                                    aggregate_prog_transition_unconditional,
-                                    build_composer_prog_dist_df,
-                                    build_composer_prog_trans_df)
-from functions.utilities import (create_composer_file_lists, 
-                                 load_tsv, 
-                                 make_csv, 
-                                 check_dirs,
-                                 pick_categories_based_on_system_type,
-                                 get_SAWINONE_PROG_CATEGORIES_trimmed)
+from functions.per_piece_functions import (
+    add_annotation_duration, 
+    add_bigram_weight, 
+    add_prog_weight, 
+    add_root_diff, 
+    add_root_progression_type_simple,
+    convert_frac_cols_to_float, 
+    drop_unnecessary_columns, 
+    uri_system_filter,
+    add_proper_empty_last_row,
+    simple_prog_transition_counts,
+    build_progression_count_per_piece,
+    count_weighted_root_diffs)
+from functions.per_composer_functions import (
+    rootdiff_bigram_weight_matrix,
+    unconditional_joint_probs,
+    composer_percentages_from_prog_counts,
+    piece_prog_transition_unconditional,
+    build_all_progs_weighted_matrix)
+from functions.my_functions import (
+    aggregate_prog_transition_unconditional,
+    all_root_prog_transition_counts, 
+    build_composer_prog_trans_df,
+    get_uncond_probs,
+    piece_progression_type_distribution,
+    aggregate_progression_distribution,
+    aggregate_prog_transition_unconditional,
+    build_composer_prog_dist_df,
+    build_composer_prog_trans_df)
+from functions.utilities import (
+    create_composer_file_lists, 
+    load_tsv, 
+    make_csv, 
+    check_dirs,
+    pick_categories_based_on_system_type,
+    get_SAWINONE_PROG_CATEGORIES_trimmed)
 from functions.import_scores import build_piece_index, group_by_composer
 from functions.visualization import plot_heatmap
 # from config import (REPOS)
@@ -42,7 +46,7 @@ def run_pipeline(system):
     system=system.lower()
     simple_categories = pick_categories_based_on_system_type(system)
     check_dirs(system) # Checks that output folder exists, creates it if it doesnt
-    download_scores() # Gets scores if theyre not already loaded in scores dir
+    # download_scores() # Gets scores if theyre not already loaded in scores dir
     # bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files = create_composer_file_lists(REPOS) 
     # composer_dict = {
     #     "Bach": bach_tsv_files,
