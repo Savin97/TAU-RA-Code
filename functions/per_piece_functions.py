@@ -36,8 +36,8 @@ def add_prog_weight(df):
     df["prog_weight"] = df["annotation_dur"].shift(1) + df["annotation_dur"]
     return df
 
-def add_bigram_weight(df):
-    df["bigram_weight"] = df["prog_weight"].shift(1) + df["prog_weight"]
+def add_bigram_prog_weight(df):
+    df["bigram_prog_weight"] = df["prog_weight"].shift(1) + df["prog_weight"]
     return df
 
 def uri_system_filter(df):
@@ -60,7 +60,7 @@ def add_proper_empty_last_row(df):
 
 def simple_prog_transition_counts(df, categories, col="progression_type_simple"):
     """
-        Return a |cats|x|cats| DataFrame of transition COUNTS:
+        Return a |cats| x |cats| DataFrame of transition COUNTS:
         rows = current, cols = next.
     """
     prog_type = df[col]
@@ -78,7 +78,7 @@ def simple_prog_transition_counts(df, categories, col="progression_type_simple")
     mat = mat.reindex(index=list(categories), columns=list(categories), fill_value=0).astype(int)
     return mat
 
-def build_progression_count_per_piece(tsv_path, df, composer, labels):
+def build_simple_progression_count_per_piece(tsv_path, df, composer, labels):
     """
         Returns 1 table: raw counts per piece.
         rows: pieces
@@ -102,7 +102,7 @@ def build_progression_count_per_piece(tsv_path, df, composer, labels):
 def count_weighted_root_diffs(df):
     # Keep alignment across columns, coerce bad values to NaN
     root_diff = pd.to_numeric(df["root_diff"], errors="coerce")
-    prog_weight = pd.to_numeric(df["bigram_weight"], errors="coerce")
+    prog_weight = pd.to_numeric(df["bigram_prog_weight"], errors="coerce")
     prev = root_diff.shift(1)
     current = root_diff
     mask = prev.notna() & current.notna() & prog_weight.notna()
@@ -118,14 +118,3 @@ def count_weighted_root_diffs(df):
     sums = np.bincount(inv, weights=weights)
 
     return Counter({(int(a), int(b)): float(s) for (a, b), s in zip(uniq, sums)})
-    root_diff = df["root_diff"].astype("Int64")
-    prev = root_diff.shift(1).to_numpy()
-    current = root_diff.to_numpy()
-    prog_weight = df["bigram_weight"]
-    pairs = np.column_stack((prev, current))
-
-    
-    uniq, inv = np.unique(pairs, axis=0, return_inverse=True)
-    sums = np.bincount(inv, weights=prog_weight)
-
-    return Counter({(np.int64(a), np.int64(b)): float(s) for (a, b), s in zip(uniq, sums)})

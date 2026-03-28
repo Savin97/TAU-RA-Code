@@ -2,17 +2,17 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 
-def rootdiff_bigram_weight_matrix(df: pd.DataFrame):
+def rootdiff_bigram_prog_weight_matrix(df: pd.DataFrame):
     """
     Returns a fixed (diff_max-diff_min+1) x (diff_max-diff_min+1) matrix:
       index = prev_root_diff
       cols  = curr_root_diff
-      values = sum(bigram_weight) over all transitions
+      values = sum(bigram_prog_weight) over all transitions
 
-    Transition i is from row i-1 -> row i, weighted by row i's bigram_weight.
+    Transition i is from row i-1 -> row i, weighted by row i's bigram_prog_weight.
     """
     root_col: str = "root_diff"
-    weight_col: str = "bigram_weight"
+    weight_col: str = "bigram_prog_weight"
     diff_min: int = -10
     diff_max: int = 10
 
@@ -61,7 +61,7 @@ def unconditional_joint_probs(mat: pd.DataFrame) -> pd.DataFrame:
         return mat.astype(float)  # all zeros; nothing to normalize
     return mat.astype(float) / total
 
-def composer_percentages_from_prog_counts(piece_counts_df, categories):
+def composer_percentages_from_prog_counts(piece_counts_df, categories) -> pd.DataFrame:
     """
         Weighted composer-level percentages:
         sum counts across pieces -> normalize.
@@ -76,7 +76,7 @@ def composer_percentages_from_prog_counts(piece_counts_df, categories):
     # keep n so you know how much data each composer had
     return pct[["n"] + list(categories)]
 
-def piece_prog_transition_unconditional(df, score, categories) -> pd.Series:
+def simple_prog_transition_per_piece(df, score, categories) -> pd.Series:
     """
         Returns unconditional transition percentages for ONE piece over the selected categories.
         Output is a flattened Series with index like 'S->A', 'A->W', etc.
@@ -126,9 +126,9 @@ def piece_prog_transition_unconditional(df, score, categories) -> pd.Series:
 # WEIGHTED PROGRESSIONS
 # ----------------------
 
-def build_all_progs_weighted_matrix(global_bigram_matrix_counts,root_diff_list):
+def build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_diff_list):
     global_matrix_mat = pd.DataFrame(0.0, index=root_diff_list, columns=root_diff_list)
-    for (a, b), val in global_bigram_matrix_counts.items():
+    for (a, b), val in all_progs_bigram_weighted_counts.items():
         # skip any pairs outside cats if needed
         if a in global_matrix_mat.index and b in global_matrix_mat.columns:
             global_matrix_mat.at[a, b] += float(val)

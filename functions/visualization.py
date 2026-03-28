@@ -1,3 +1,4 @@
+# visualization.py
 import numpy as np
 import matplotlib.pyplot as plt
 from config import OUTPUT_PATH
@@ -92,3 +93,87 @@ def plot_heatmap(system,
     plt.tight_layout()
     plt.savefig(f"{OUTPUT_PATH}/{system}/img/{filename}.png")
     plt.close()
+
+def plot_stacked_bars(stacked_df, composer_order):
+    # x labels with years
+    x_labels = [
+        f"{composer}\n{int(year)}"
+        for composer, year in zip(
+            composer_order["composer"],
+            composer_order["composer_mid_year"]
+        )
+    ]
+    # Add "Other" = remaining probability mass
+    stacked_df["Other"] = 1 - stacked_df.sum(axis=1)
+
+    # numerical safety (avoid tiny negatives due to float errors)
+    stacked_df["Other"] = stacked_df["Other"].clip(lower=0)
+
+    # ------------------------------
+    # Handling colors
+    # ------------------------------
+    color_map = { 
+        "0": "#BBBBBB",
+        "1": "#DD8452",
+        "2": "#55A868",
+        "Other": "#000000"
+    }
+    # generate random colors for anything not in the map
+    rng = np.random.default_rng(40)  # fixed seed → consistent colors
+
+    def random_color():
+        return rng.random(3,)  # RGB tuple
+
+    colors = [
+        color_map[col] if col in color_map else random_color()
+        for col in stacked_df.columns
+    ]
+
+    ax = stacked_df.plot(
+        kind="bar",
+        stacked=True,
+        figsize=(30, 8),
+        color=colors
+    )
+    stacked_df = stacked_df[sorted(stacked_df.columns)]
+
+    ax.set_xlabel("Composer (mid-life year)")
+    ax.set_ylabel("Probability")
+    ax.set_title("Top 5 Root Progressions per Composer")
+
+    # ------------------------------
+    # Add labels inside each segment
+    # ------------------------------
+    for container in ax.containers:
+        for bar in container:
+            height = bar.get_height()
+
+            if height < 0.02:   # skip tiny segments (avoid clutter)
+                continue
+
+            x = bar.get_x() + bar.get_width() / 2
+            y = bar.get_y() + height / 2
+
+            ax.text(
+                x,
+                y,
+                f"{height:.2f}",   # show probability
+                ha="center",
+                va="center",
+                fontsize=8
+            )
+    # The last container corresponds to the last column ("Other")
+    other_container = ax.containers[-1]
+
+    for bar in other_container:
+        bar.set_hatch("//")          # diagonal lines
+        bar.set_facecolor("none")    # transparent fill
+        bar.set_edgecolor("black")   # visible hatch lines
+        ax.set_xticklabels(x_labels, rotation=30, ha="right")
+
+    ax.legend(title="Root progression", bbox_to_anchor=(1.02, 1), loc="upper left")
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_PATH}/chronoligcal_root_prog_graph.png")
+    plt.close()
+    print(f"Chronoligcal Root Progression Graph Created in: '{OUTPUT_PATH}/chronoligcal_root_prog_graph.png'")
+    return 

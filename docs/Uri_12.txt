@@ -1,0 +1,8 @@
+1. Martin only needs to see his pipeline and only WEIGHTED results
+2. The chronoligical map should be - columns of Top 5 WEIGHTED progressions(unigrams),
+one after the other, from left to right - early to late, each column has the composer's name and his mid-life date.
+40 year windows(20 forward, 20 back), overlapping. (1600, 1620, 1640...)
+3. The chronoligical map should be - columns of Top 5 WEIGHTED progressions(unigrams),
+one after the other, from left to right - early to late, each column has the composer's name and his mid-life date.
+This time - just one after the other, with the year above them.
+One with top 5 Unigrams in the columns, and one with top 10 bigrams.

@@ -1,12 +1,13 @@
+# functions/my_functions.py
 import pandas as pd
 import numpy as np
 from collections import Counter
 from config import (SAWINONE_PROG_CATEGORIES)
 
-def get_uncond_probs(global_transition_counts):
+def get_uncond_probs(transition_counts):
     # Unconditional Probabilities - sums to 1 over all cells
-    total_transitions = float(np.nansum(global_transition_counts.to_numpy()))
-    uncond_probs = (global_transition_counts / total_transitions) if total_transitions else global_transition_counts.astype(float)
+    total_transitions = float(np.nansum(transition_counts.to_numpy()))
+    uncond_probs = (transition_counts / total_transitions) if total_transitions else transition_counts.astype(float)
     return uncond_probs
 
 def piece_progression_type_distribution(df, score, categories) -> pd.Series:
@@ -28,17 +29,12 @@ def piece_progression_type_distribution(df, score, categories) -> pd.Series:
         return pd.Series({lab: 0.0 for lab in categories}, name=str(score))
     return (counts / total).rename(str(score))
 
-def build_composer_prog_dist_df(piece_prog_type_dist_rows):
-    composer_prog_type_dist_df = pd.DataFrame(piece_prog_type_dist_rows)
+def build_composer_prog_dist_df(simple_piece_prog_type_dist_rows):
+    composer_prog_type_dist_df = pd.DataFrame(simple_piece_prog_type_dist_rows)
     # nicer column order
     dist_cols = ["composer", "piece"] + [c for c in SAWINONE_PROG_CATEGORIES if c in composer_prog_type_dist_df.columns]
     composer_prog_type_dist_df = composer_prog_type_dist_df.reindex(columns=dist_cols)
     return composer_prog_type_dist_df
-    
-def build_composer_prog_trans_df(piece_prog_type_trans_rows):
-    composer_prog_type_trans_df = pd.DataFrame(piece_prog_type_trans_rows)
-    composer_prog_type_trans_df = composer_prog_type_trans_df.fillna(0.0)
-    return composer_prog_type_trans_df
 
 def aggregate_progression_distribution(dist_df: pd.DataFrame, categories):
     """
@@ -60,6 +56,30 @@ def aggregate_prog_transition_unconditional(trans_df: pd.DataFrame):
     trans_cols = [c for c in trans_df.columns if c not in ("composer", "piece")]
     agg = trans_df.groupby("composer")[trans_cols].mean()
     return agg
+# ------------------------------------------------------------------
+# Build probs matrix from counts of all progs
+# -------------------------------------------------------------------
+def build_all_counts_probs_matrix_from_counts(all_prog_counts_matrix):
+            total = all_prog_counts_matrix.to_numpy().sum()
+            # Trimming unused categories
+            row_ct = all_prog_counts_matrix.sum(axis=1)
+            col_ct = all_prog_counts_matrix.sum(axis=0)
+            keep = (row_ct + col_ct) > 0
+            counts_trim = all_prog_counts_matrix.loc[keep, keep]
+            total = counts_trim.to_numpy().sum()
+            all_prog_probs_matrix = (counts_trim / total) if total else counts_trim.astype(float)
+            return all_prog_probs_matrix
+# -------------------------------------------------------------------
+# Root-change (diff value) unigram 
+# -------------------------------------------------------------------
+def all_root_prog_counts(df) -> Counter:
+    """
+        Build a transition-count matrix of root_change -> next root_change.
+        This is different from the S/W/A categorization: it uses the *raw* diff values.
+        By default it returns a 21x21 matrix over {-10,-9, ..., 10}.
+    """
+    root_diff = df["root_diff"].dropna().astype(int)
+    return Counter(root_diff)
 
 # -------------------------------------------------------------------
 # Root-change (diff value) transition matrix (requested 21x21)
@@ -68,7 +88,7 @@ def all_root_prog_transition_counts(df) -> Counter: #-> pd.DataFrame:
     """
         Build a transition-count matrix of root_change -> next root_change.
         This is different from the S/W/A categorization: it uses the *raw* diff values.
-        By default it returns a 21x21 matrix over {-10..-1, 1..10} (excludes 0).
+        By default it returns a 21x21 matrix over {-10,-9, ..., 10}.
     """
     root_diff = df["root_diff"].dropna().astype(int)
     current = root_diff.iloc[:-1].to_numpy()

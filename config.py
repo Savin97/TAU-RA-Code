@@ -7,18 +7,46 @@ SAWINONE_PROG_CATEGORIES = ("S", "A", "W", "I", "None")
 SIMPLE_PROGRESSION_CATEGORIES_URI = ("S", "A", "W")
 SIMPLE_PROGRESSION_CATEGORIES_MARTIN = ("S", "A", "W",  "I")
 
-# Variables
-REPOS = [
-        "bach_en_fr_suites",
-        "bach_solo",
-        "beethoven_piano_sonatas",
-        "ABC",
-        "chopin_mazurkas",
-        "mozart_piano_sonatas",
-        "liszt_pelerinage"
-    ]
 
-#
+composer_mid_life_dates = {
+    'Bach': 1717,
+    'Bartok': 1913,
+    'Beethoven': 1798,
+    'CPE_Bach': 1751,
+    'Chopin': 1829,
+    'Clara_Schumann': 1857,
+    'Corelli': 1683,
+    'Couperin': 1700,
+    'Debussy': 1890,
+    'Dvorak': 1872,
+    'Frescobaldi': 1613,
+    'Grieg': 1875,
+    'Handel': 1722,
+    'JC_Bach': 1758,
+    'Kozeluh': 1782,
+    'Liszt': 1848,
+    'Mahler': 1885,
+    'Medtner': 1915,
+    'Mendelssohn': 1828,
+    'Monteverdi': 1605,
+    'Mozart': 1773,
+    'Pergolesi': 1723,
+    'Peri': 1597,
+    'Pleyel': 1794,
+    'Poulenc': 1931,
+    'Rachmaninoff': 1908,
+    'Ravel': 1906,
+    'Scarlatti': 1721,
+    'Schubert': 1812,
+    'Schuetz': 1628,
+    'Schulhoff': 1918,
+    'Schumann': 1833,
+    'Sweelinck': 1591,
+    'Tchaikovsky': 1866,
+    'WF_Bach': 1747,
+    'Wagner': 1848
+}
+
 UNNECESSARY_COLS = (
     ["mn", 
     "mn_onset",
