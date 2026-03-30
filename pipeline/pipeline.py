@@ -49,7 +49,8 @@ def run_pipeline(system):
     # 1) Initialize system, categories, check dirs
     # ------------------------------------------
     system = system.lower()
-    simple_categories = pick_categories_based_on_system_type(system)
+    # NOTE: Schoenberg categories are called "simple" in this pipeline version.
+    simple_categories = pick_categories_based_on_system_type(system) 
     check_dirs(system) # Checks that output folder exists, creates it if it doesnt
     # ------------------------------------------
     # 2) Import scores, grouped by composer name
@@ -61,7 +62,7 @@ def run_pipeline(system):
     # ------------------------------------------
     # 3) Initialize global collectors
     # ------------------------------------------
-    simple_prog_perct_with_composer_year_df = pd.DataFrame(columns=["composer"] + list(simple_categories) + ["n", "composer_mid_year"])
+    simple_prog_perct_with_composer_year_df = pd.DataFrame(columns=["composer"] + list(simple_categories) + ["n", "composer_mid_year"]) # Schoenberg categories
     all_progs_counter = []
     # ------------------------------------------
     # 4) Iterate over composers
@@ -116,7 +117,7 @@ def run_pipeline(system):
             # piece_prog_type_trans_rows.append({"composer": composer, "piece": score, **simple_prog_type_trans.to_dict()})
 
             # ------------------------------------------
-            # Simple progs (S,A,W,I)
+            # Schoenberg categories (S,A,W,I)
             # ------------------------------------------
             simple_prog_count_per_composer_list.append(build_simple_progression_count_per_piece(Path(piece.path), df, composer, labels=simple_categories))
             simple_prog_bigram_count = simple_prog_transition_counts(df, categories=simple_categories)
@@ -155,7 +156,7 @@ def run_pipeline(system):
             tmp_row.update(all_progs_unigram_counts)
             all_progs_counter.append(tmp_row)
     
-        # SIMPLE PROGRESSION BIGRAM PROBS MATRIX
+        # Schoenberg categories BIGRAM PROBS MATRIX
         simple_prog_bigram_probs = get_uncond_probs(simple_prog_bigram_counts)
                                                     
         # TABLE OF WEIGHTED DIFFERENCES OF ALL ROOT PROGS 
@@ -235,7 +236,7 @@ def run_pipeline(system):
         .fillna(0)
         .loc[ordered_composers]
     )
-    # PLOTTTING
+    # PLOTTING CHRONOLOGICAL COMPOSER TOP 5 PROGS
     plot_stacked_bars(stacked_df, composer_order )
 
     # Aggregate data per composer
