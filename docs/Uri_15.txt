@@ -1,0 +1,7 @@
+1. Build a catalog, metadata of all pieces that are in the reviewed files (composer, name of piece and part name), chronological order.
+table: Composer name | Part name
+2. Look at the extended corpus uri sent, extract from it the same list as section 1.
+3. Build a mechanism for n-grams: pick n and leave only the top probability n-grams.
+Pick the top 100.
+Save the count AND which piece it's from, what composer and the row ID from that file.
+4. Prepare the project so it can run on any pc - the pipeline should download/check scores.

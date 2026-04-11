@@ -1,0 +1,3 @@
+1. In the graph, fill in the top with some diagonal lines, just so the stacks fill the whole column. Call it REST.
+2. Swap brown color with gray, and make the gray a bit lighter (of the 0 prog)
+3. Send the table of all the unigram progs per composer, csv file
