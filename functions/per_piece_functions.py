@@ -40,6 +40,27 @@ def add_bigram_prog_weight(df):
     df["bigram_prog_weight"] = df["prog_weight"].shift(1) + df["prog_weight"]
     return df
 
+def add_n_gram(df, n):
+    col_name = f"{n}-gram_progs"
+    df[col_name] = [
+        tuple(int(v) for v in window) if i >= n-1 and not window.isna().any() else None
+        for i in range(len(df))
+        for window in [df["root_diff"].iloc[i-n+1:i+1]]
+    ]
+    return df
+
+def add_n_gram_weighed(df, n):
+    col_name = f"{n}-gram_weight"
+    
+    df[col_name] = [
+        df["prog_weight"].iloc[i-n+2:i+1].sum()
+        if i >= n-1 and not df["prog_weight"].iloc[i-n+2:i+1].isna().any()
+        else None
+        for i in range(len(df))
+    ]
+    
+    return df
+
 def uri_system_filter(df):
     df = df[df["root"] != df["root"].shift(1)]
     return df

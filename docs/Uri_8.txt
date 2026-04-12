@@ -1,4 +1,4 @@
-0. Split into 2 systems - martin's and uri's
+0. Split into 2 systems - final's and uri's
 1. For Uri's system - delete rows with root_diff=0
 2. 2 rows that have the same root - delete the second row
 3. For every piece, on every harmonic label (in both systems),

@@ -1,4 +1,4 @@
-V 0. Make martin's pipeline the primary one
+V 0. Make final's pipeline the primary one
 V 1. When plotting graphs, true 0 values should be grayed out.
 2. Dont pass static categories, use root_diff_weight_df.csv 
 to get all possible progressions for the graph axes

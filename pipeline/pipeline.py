@@ -4,6 +4,8 @@ from pathlib import Path
 from collections import defaultdict, Counter
 from functions.per_piece_functions import (
     add_annotation_duration, 
+    add_n_gram,
+    add_n_gram_weighed,
     add_bigram_prog_weight, 
     add_prog_weight, 
     add_root_diff, 
@@ -36,7 +38,7 @@ from functions.utilities import (
 from functions.import_scores import build_piece_paths_list, group_by_composer
 from functions.visualization import plot_heatmap, plot_stacked_bars
 from config import composer_mid_life_dates
-def run_pipeline(system):
+def run_pipeline(system, n):
     """
         Go through all reviewed tsv files.
         Build necessary features such as root_diff.
@@ -103,7 +105,10 @@ def run_pipeline(system):
             for f in features:
                 # Add root difference,root progression types, and accumulate transition counts from all scores
                 df = f(df)
-
+            df = add_n_gram(df,n)
+            df = add_n_gram_weighed(df,n)
+            df.to_csv("df.csv", index=False)
+            exit()
             # ------------------------------------------
             # Collect info from each piece - simple and all progs, weights
             # ------------------------------------------

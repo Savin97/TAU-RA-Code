@@ -4,7 +4,7 @@ import numpy as np
 from fractions import Fraction
 
 from config import (ROOT_PATH,
-                    SIMPLE_PROGRESSION_CATEGORIES_MARTIN,
+                    SIMPLE_PROGRESSION_CATEGORIES_final,
                     SIMPLE_PROGRESSION_CATEGORIES_URI)
 
 def load_tsv(score):
@@ -37,9 +37,9 @@ def check_dirs(system):
     (base / system /"csv" / "global").mkdir(parents=True, exist_ok=True)
 
 def pick_categories_based_on_system_type(system):
-    if system == "martin":
-        simple_categories = SIMPLE_PROGRESSION_CATEGORIES_MARTIN
-        print("--------------------\nRunning Martin's pipeline...\n--------------------")
+    if system == "final":
+        simple_categories = SIMPLE_PROGRESSION_CATEGORIES_final
+        print("--------------------\nRunning final's pipeline...\n--------------------")
     elif system == "uri":
         simple_categories = SIMPLE_PROGRESSION_CATEGORIES_URI
         print("--------------------\nRunning Uri's pipeline...\n--------------------")

@@ -5,7 +5,7 @@ ROOT_PATH = "."   # point this to the folder containing the 4 repos
 # Progression categories and values
 SAWINONE_PROG_CATEGORIES = ("S", "A", "W", "I", "None")
 SIMPLE_PROGRESSION_CATEGORIES_URI = ("S", "A", "W")
-SIMPLE_PROGRESSION_CATEGORIES_MARTIN = ("S", "A", "W",  "I")
+SIMPLE_PROGRESSION_CATEGORIES_final = ("S", "A", "W",  "I")
 
 
 composer_mid_life_dates = {
