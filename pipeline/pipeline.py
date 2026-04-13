@@ -70,6 +70,8 @@ def run_pipeline(system, n):
     # 4) Iterate over composers
     # ------------------------------------------
     for composer, pieces in pieces_grouped_by_composer.items():
+        # if composer != "Bach":
+        #     continue
         # ------------------------------------------
         # 5) Initialize per-composer collectors
         # ------------------------------------------
@@ -107,8 +109,11 @@ def run_pipeline(system, n):
                 df = f(df)
             df = add_n_gram(df,n)
             df = add_n_gram_weighed(df,n)
-            df.to_csv("df.csv", index=False)
-            exit()
+            # if score == "BWV806_02_Allemande":
+            #     df.to_csv(f"{score}_df.csv", index=False)
+            #     exit()
+            # else:
+            #     continue
             # ------------------------------------------
             # Collect info from each piece - simple and all progs, weights
             # ------------------------------------------

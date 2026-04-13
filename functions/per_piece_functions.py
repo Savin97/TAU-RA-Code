@@ -53,8 +53,8 @@ def add_n_gram_weighed(df, n):
     col_name = f"{n}-gram_weight"
     
     df[col_name] = [
-        df["prog_weight"].iloc[i-n+2:i+1].sum()
-        if i >= n-1 and not df["prog_weight"].iloc[i-n+2:i+1].isna().any()
+        df["prog_weight"].iloc[i-n+1:i+1].sum()
+        if i >= n-1 and not df["prog_weight"].iloc[i-n+1:i+1].isna().any()
         else None
         for i in range(len(df))
     ]
