@@ -5,20 +5,20 @@ from collections import Counter
 def rootdiff_bigram_prog_weight_matrix(df: pd.DataFrame):
     """
     Returns a fixed (diff_max-diff_min+1) x (diff_max-diff_min+1) matrix:
-      index = prev_root_diff
-      cols  = curr_root_diff
+      index = prev_root_prog
+      cols  = curr_root_prog
       values = sum(bigram_prog_weight) over all transitions
 
     Transition i is from row i-1 -> row i, weighted by row i's bigram_prog_weight.
     """
-    root_col: str = "root_diff"
+    root_col: str = "root_prog"
     weight_col: str = "bigram_prog_weight"
     diff_min: int = -10
     diff_max: int = 10
 
     d = df.copy()
     
-    # Need previous + current root_diff
+    # Need previous + current root_prog
     prev_root = d[root_col].shift(1)
     curr_root = d[root_col]
 
@@ -29,7 +29,7 @@ def rootdiff_bigram_prog_weight_matrix(df: pd.DataFrame):
         "w": d[weight_col]
     }).dropna(subset=["prev", "curr", "w"])
 
-    # force int bins (since root_diff should be integer categories)
+    # force int bins (since root_prog should be integer categories)
     trans["prev"] = trans["prev"].astype(int)
     trans["curr"] = trans["curr"].astype(int)
 
@@ -46,8 +46,8 @@ def rootdiff_bigram_prog_weight_matrix(df: pd.DataFrame):
     # enforce full 21x21 grid even if some diffs never appear
     mat = mat.reindex(index=cats, columns=cats, fill_value=0.0)
 
-    mat.index.name = "prev_root_diff"
-    mat.columns.name = "curr_root_diff"
+    mat.index.name = "prev_root_prog"
+    mat.columns.name = "curr_root_prog"
     return mat
 
 
@@ -126,14 +126,14 @@ def simple_prog_transition_per_piece(df, score, categories) -> pd.Series:
 # WEIGHTED PROGRESSIONS
 # ----------------------
 
-def build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_diff_list):
-    global_matrix_mat = pd.DataFrame(0.0, index=root_diff_list, columns=root_diff_list)
+def build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_prog_list):
+    global_matrix_mat = pd.DataFrame(0.0, index=root_prog_list, columns=root_prog_list)
     for (a, b), val in all_progs_bigram_weighted_counts.items():
         # skip any pairs outside cats if needed
         if a in global_matrix_mat.index and b in global_matrix_mat.columns:
             global_matrix_mat.at[a, b] += float(val)
-    global_matrix_mat.index.name = "prev_root_diff"
-    global_matrix_mat.columns.name = "curr_root_diff"
+    global_matrix_mat.index.name = "prev_root_prog"
+    global_matrix_mat.columns.name = "curr_root_prog"
 
     total = float(global_matrix_mat.to_numpy().sum())
     if total == 0.0:

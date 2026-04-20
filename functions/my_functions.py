@@ -78,8 +78,8 @@ def all_root_prog_counts(df) -> Counter:
         This is different from the S/W/A categorization: it uses the *raw* diff values.
         By default it returns a 21x21 matrix over {-10,-9, ..., 10}.
     """
-    root_diff = df["root_diff"].dropna().astype(int)
-    return Counter(root_diff)
+    root_prog = df["root_prog"].dropna().astype(int)
+    return Counter(root_prog)
 
 # -------------------------------------------------------------------
 # Root-change (diff value) transition matrix (requested 21x21)
@@ -90,7 +90,7 @@ def all_root_prog_transition_counts(df) -> Counter: #-> pd.DataFrame:
         This is different from the S/W/A categorization: it uses the *raw* diff values.
         By default it returns a 21x21 matrix over {-10,-9, ..., 10}.
     """
-    root_diff = df["root_diff"].dropna().astype(int)
-    current = root_diff.iloc[:-1].to_numpy()
-    next = root_diff.iloc[1:].to_numpy()
+    root_prog = df["root_prog"].dropna().astype(int)
+    current = root_prog.iloc[:-1].to_numpy()
+    next = root_prog.iloc[1:].to_numpy()
     return Counter(zip(current,next))

@@ -16,12 +16,12 @@ def convert_frac_cols_to_float(df):
             df[frac_cols_numeric[i]] = df[frac_cols[i]].apply(frac_to_float)
     return df
 
-def add_root_diff(df):
-    df["root_diff"] = df["root"].diff()
+def add_root_prog(df):
+    df["root_prog"] = df["root"].diff()
     return df
 
 def add_root_progression_type_simple(df):
-    df["progression_type_simple"] = df["root_diff"].apply(classify_movement_SAWI)
+    df["progression_type_simple"] = df["root_prog"].apply(classify_movement_SAWI)
     return df
 
 def add_annotation_duration(df):
@@ -45,7 +45,7 @@ def add_n_gram(df, n):
     df[col_name] = [
         tuple(int(v) for v in window) if i >= n-1 and not window.isna().any() else None
         for i in range(len(df))
-        for window in [df["root_diff"].iloc[i-n+1:i+1]]
+        for window in [df["root_prog"].iloc[i-n+1:i+1]]
     ]
     return df
 
@@ -120,12 +120,12 @@ def build_simple_progression_count_per_piece(tsv_path, df, composer, labels):
 # WEIGHTED PROGRESSIONS
 # ----------------------
 
-def count_weighted_root_diffs(df):
+def count_weighted_root_progs(df):
     # Keep alignment across columns, coerce bad values to NaN
-    root_diff = pd.to_numeric(df["root_diff"], errors="coerce")
+    root_prog = pd.to_numeric(df["root_prog"], errors="coerce")
     prog_weight = pd.to_numeric(df["bigram_prog_weight"], errors="coerce")
-    prev = root_diff.shift(1)
-    current = root_diff
+    prev = root_prog.shift(1)
+    current = root_prog
     mask = prev.notna() & current.notna() & prog_weight.notna()
     if not mask.any():
         return Counter()

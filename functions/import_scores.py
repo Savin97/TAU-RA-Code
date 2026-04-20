@@ -35,7 +35,7 @@ def infer_composer(repo_name: str) -> str:
         return "JC_Bach"
     if r.startswith("c_schumann"):
         return "Clara_Schumann"
-    if r.startswith("ABC"):
+    if r.startswith == "abc":
         return "Beethoven"
 
     # Straight composer prefixes
@@ -86,11 +86,11 @@ def build_piece_paths_list(scores_root: Path) -> list[PieceRecord]:
         reviewed_dir = repo_dir / "reviewed"
         repo = repo_dir.name
         composer = infer_composer(repo)
-        # allowed_composers = ["Bach", "Mozart"]
-        # if composer in allowed_composers:
-        for tsv_path in sorted(reviewed_dir.glob("*.tsv")):
-            score = score_name_from_path(tsv_path)
-            records.append(PieceRecord(composer=composer, repo=repo, score=score, path=tsv_path))
+        allowed_composers = ["Bach", "Beethoven", "Mozart"]
+        if composer in allowed_composers:
+            for tsv_path in sorted(reviewed_dir.glob("*.tsv")):
+                score = score_name_from_path(tsv_path)
+                records.append(PieceRecord(composer=composer, repo=repo, score=score, path=tsv_path))
     return records
 
 def group_by_composer(records: list) -> dict[str, list[PieceRecord]]:

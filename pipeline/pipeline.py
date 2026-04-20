@@ -1,5 +1,13 @@
 # pipeline/pipeline.py
-import pandas as pd, matplotlib.pyplot as plt
+"""
+    Go through all reviewed tsv files.
+    Build necessary features such as root_prog.
+    Sum up all root progressions.
+    Sum up all 2D root progressions.
+    Calculate uncond probabilties.
+    Create graphs and csv tables.
+"""
+import pandas as pd
 from pathlib import Path
 from collections import defaultdict, Counter
 from functions.per_piece_functions import (
@@ -8,7 +16,7 @@ from functions.per_piece_functions import (
     add_n_gram_weighed,
     add_bigram_prog_weight, 
     add_prog_weight, 
-    add_root_diff, 
+    add_root_prog, 
     add_root_progression_type_simple,
     convert_frac_cols_to_float, 
     drop_unnecessary_columns, 
@@ -16,7 +24,7 @@ from functions.per_piece_functions import (
     add_proper_empty_last_row,
     simple_prog_transition_counts,
     build_simple_progression_count_per_piece,
-    count_weighted_root_diffs)
+    count_weighted_root_progs)
 from functions.per_composer_functions import (
     composer_percentages_from_prog_counts,
     simple_prog_transition_per_piece,
@@ -39,20 +47,10 @@ from functions.import_scores import build_piece_paths_list, group_by_composer
 from functions.visualization import plot_heatmap, plot_stacked_bars
 from config import composer_mid_life_dates
 def run_pipeline(system, n):
-    """
-        Go through all reviewed tsv files.
-        Build necessary features such as root_diff.
-        Sum up all root progressions.
-        Sum up all 2D root progressions.
-        Calculate uncond probabilties.
-        Create graphs and csv tables.
-    """
     # ------------------------------------------
     # 1) Initialize system, categories, check dirs
     # ------------------------------------------
     system = system.lower()
-    # NOTE: Schoenberg categories are called "simple" in this pipeline version.
-    simple_categories = pick_categories_based_on_system_type(system) 
     check_dirs(system) # Checks that output folder exists, creates it if it doesnt
     # ------------------------------------------
     # 2) Import scores, grouped by composer name
@@ -64,25 +62,22 @@ def run_pipeline(system, n):
     # ------------------------------------------
     # 3) Initialize global collectors
     # ------------------------------------------
-    simple_prog_perct_with_composer_year_df = pd.DataFrame(columns=["composer"] + list(simple_categories) + ["n", "composer_mid_year"]) # Schoenberg categories
     all_progs_counter = []
+    n_gram_dict = {}
     # ------------------------------------------
     # 4) Iterate over composers
     # ------------------------------------------
     for composer, pieces in pieces_grouped_by_composer.items():
-        # if composer != "Bach":
-        #     continue
         # ------------------------------------------
         # 5) Initialize per-composer collectors
         # ------------------------------------------
         print(f"Processing composer: {composer} with {len(pieces)} scores...")
-        # per-composer accumulators
-        simple_prog_count_per_composer_list, simple_piece_prog_type_dist_rows, piece_prog_type_trans_rows = [], [], []
-        composer_root_diff_weight = defaultdict(float)  # {root_diff: total_prog_weight}
-        simple_prog_bigram_counts = pd.DataFrame(0, index=list(simple_categories),columns=list(simple_categories), dtype=int)
+        # Per-composer accumulators
+        composer_root_prog_weight = defaultdict(float)  # {root_prog: total_prog_weight}
         all_progs_unigram_counts = Counter() # unigram
         all_progs_bigram_weighted_counts = Counter() # bigram, weighted
-        root_diff_set = set() # set of all root_diff values per composer
+        n_gram_counter = Counter()
+        root_prog_set = set() # set of all root_prog values per composer
         # ------------------------------------------
         # 5) Iterate over pieces of each composer
         # ------------------------------------------
@@ -91,12 +86,12 @@ def run_pipeline(system, n):
             # Load piece, build features
             # ------------------------------------------
             df = load_tsv(piece.path)
-            score = piece.score
+            score = piece.score # score name
             features = [
                 add_proper_empty_last_row,
                 drop_unnecessary_columns,
                 convert_frac_cols_to_float,
-                add_root_diff, 
+                add_root_prog, 
                 add_root_progression_type_simple, 
                 add_annotation_duration,
                 add_prog_weight,
@@ -105,59 +100,39 @@ def run_pipeline(system, n):
             if system == "uri":
                 features.append(uri_system_filter)
             for f in features:
-                # Add root difference,root progression types, and accumulate transition counts from all scores
-                df = f(df)
+                df = f(df) # Add all of the features listed above
             df = add_n_gram(df,n)
             df = add_n_gram_weighed(df,n)
-            # if score == "BWV806_02_Allemande":
-            #     df.to_csv(f"{score}_df.csv", index=False)
-            #     exit()
-            # else:
-            #     continue
+            n_gram_counter.update(df[f"{n}-gram_progs"])
             # ------------------------------------------
-            # Collect info from each piece - simple and all progs, weights
+            # Collect info from each piece - all progs, weights
             # ------------------------------------------
-
-            # Update unique set of root_diff
-            root_diff_set.update(df["root_diff"].dropna().astype(int).tolist())
-
-            # piece_prog_type_dist = piece_progression_type_distribution(df, score,categories=simple_categories)
-            # simple_piece_prog_type_dist_rows.append({"composer": composer, "piece": score, **piece_prog_type_dist.to_dict()} )
-            # simple_prog_type_trans = simple_prog_transition_per_piece(df, score,categories=simple_categories)
-            # piece_prog_type_trans_rows.append({"composer": composer, "piece": score, **simple_prog_type_trans.to_dict()})
-
-            # ------------------------------------------
-            # Schoenberg categories (S,A,W,I)
-            # ------------------------------------------
-            simple_prog_count_per_composer_list.append(build_simple_progression_count_per_piece(Path(piece.path), df, composer, labels=simple_categories))
-            simple_prog_bigram_count = simple_prog_transition_counts(df, categories=simple_categories)
-            simple_prog_bigram_counts = simple_prog_bigram_count.add(simple_prog_bigram_counts,fill_value=0)
+            # Update unique set of root_prog
+            root_prog_set.update(df["root_prog"].dropna().astype(int).tolist())
             # ------------------------------------------
             # All progs
             # ------------------------------------------
             all_progs_unigram_counts.update(all_root_prog_counts(df)) 
-            all_progs_bigram_weighted_counts.update(count_weighted_root_diffs(df)) # Weighted
+            all_progs_bigram_weighted_counts.update(count_weighted_root_progs(df)) # Weighted
             # ------------------------------------------
             # Sum up weights of root progressions
             # ------------------------------------------
             piece_prog_weight_sum = (
-                df.dropna(subset=["root_diff", "prog_weight"])
-                .assign(root_diff=lambda x: x["root_diff"].astype(int))
-                .groupby("root_diff")["prog_weight"]
-                .sum()
+                df.dropna(subset=["root_prog", "prog_weight"])
+                    .assign(root_prog=lambda x: x["root_prog"].astype(int))
+                    .groupby("root_prog")["prog_weight"]
+                    .sum()
             )
             # Assign weight to dict holder
-            for root_diff, wsum in piece_prog_weight_sum.items():
-                composer_root_diff_weight[ int(root_diff) ] += float(wsum) # type: ignore
-
-        simple_prog_count_per_piece_per_composer_df= pd.DataFrame(simple_prog_count_per_composer_list)
-        # Stable column order
-        simple_prog_count_per_piece_per_composer_df = simple_prog_count_per_piece_per_composer_df[["composer", "piece", "n"] + list(simple_categories) ]
-        simple_prog_percentage_per_composer = composer_percentages_from_prog_counts(simple_prog_count_per_piece_per_composer_df, categories=simple_categories)
+            for root_prog, wsum in piece_prog_weight_sum.items():
+                composer_root_prog_weight[ int(root_prog) ] += float(wsum) # type: ignore
+            # ------------------------------------------
+            # END OF PIECES LOOP
+            # ------------------------------------------
+        # ------------------------------------------
         # DF with composer's year
-
-        # Avoid counting "All" as a composer
-        if composer != "All":
+        # ------------------------------------------
+        if composer != "All": # Avoid counting "All" as a composer
             tmp_row = {
                 "composer": composer,
                 "composer_mid_year": composer_mid_life_dates[composer],
@@ -165,40 +140,43 @@ def run_pipeline(system, n):
             # add progression counts as columns
             tmp_row.update(all_progs_unigram_counts)
             all_progs_counter.append(tmp_row)
-    
-        # Schoenberg categories BIGRAM PROBS MATRIX
-        simple_prog_bigram_probs = get_uncond_probs(simple_prog_bigram_counts)
-                                                    
+                                          
         # TABLE OF WEIGHTED DIFFERENCES OF ALL ROOT PROGS 
-
-        root_diff_list = sorted(list(root_diff_set))
-        composer_root_diff_weight_unigram_df = (
-            pd.Series(composer_root_diff_weight, name="prog_weight_sum")
+        root_prog_list = sorted(list(root_prog_set))
+        composer_root_prog_weight_unigram_df = (
+            pd.Series(composer_root_prog_weight, name="prog_weight_sum")
             .sort_index()
             .reset_index()
-            .rename(columns={"index": "root_diff"})
+            .rename(columns={"index": "root_prog"})
         )
-        # ALL PROGRESSION PROBS
-        all_progs_weighted_matrix = build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_diff_list)
-        # composer_prog_type_dist_df = build_composer_prog_dist_df(simple_piece_prog_type_dist_rows)
-        # composer_prog_type_trans_df = pd.DataFrame(piece_prog_type_trans_rows).fillna(0.0)
 
+        # n-grams
+        n_gram_dict[composer] = n_gram_counter
+
+        # ALL PROGRESSION PROBS
+        all_progs_weighted_matrix = build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_prog_list)
+        
         # Outputs:
         # CSVs
-        # for df, name in [
-        #     (composer_prog_type_dist_df, "composer_prog_type_dist_df"),
-            # (composer_prog_type_trans_df, "composer_prog_type_trans_df")
-            # ]:
-            # make_csv(df, f"{composer}_{name}", system = system, path_modifier="piece") 
         for df,name in [
-            # (simple_prog_percentage_per_composer, "simple_prog_percentage_per_composer"),
-            (composer_root_diff_weight_unigram_df, "composer_root_diff_weight_unigram_df")
+            (composer_root_prog_weight_unigram_df, "composer_root_prog_weight_unigram_df")
             ]:
             make_csv(df, f"{composer}_{name}",system = system, path_modifier="composer") 
-        # Output to graph imgs 
-        # plot_heatmap(system=system, composer=composer, graph_title = "SAW", filename=f"{composer}_SAW_{system}", transition_matrix=simple_prog_bigram_probs, categories=simple_categories)
-        plot_heatmap(system=system, composer=composer, graph_title = "All Progs Weighted Values", filename=f"{composer}_ALL_WEIGHTED_{system}", transition_matrix=all_progs_weighted_matrix, categories=root_diff_list) 
 
+        # Graphs
+        plot_heatmap(system=system, composer=composer, graph_title = "Weighted Progs", filename=f"{composer}_ALL_WEIGHTED_{system}", transition_matrix=all_progs_weighted_matrix, categories=root_prog_list) 
+        # ------------------------------------------
+        # END OF COMPOSERS LOOP
+        # ------------------------------------------
+    text = open("n-grams.txt", 'w')
+    print(list(n_gram_dict.keys()))
+    for key,item in n_gram_dict.items():
+        print(f"{key} number of n-progs: {len(item)}")
+        text.write()
+
+    all_n_grams = n_gram_dict["All"]
+    top_100 = all_n_grams.most_common(100)
+    print(top_100)
     # ---------------------------------
     # Plotting all prog unigrams
     # ---------------------------------
