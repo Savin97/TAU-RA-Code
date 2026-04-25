@@ -172,8 +172,8 @@ def run_pipeline(system, n):
     print(list(n_gram_dict.keys()))
     for key,item in n_gram_dict.items():
         print(f"{key} number of n-progs: {len(item)}")
-        text.write()
-
+        text.write(f"{key}\t{item} ")
+    print("Created n-grams.txt")
     all_n_grams = n_gram_dict["All"]
     top_100 = all_n_grams.most_common(100)
     print(top_100)
