@@ -8,7 +8,7 @@ def main():
         Choose system = "uri" to exclude them.
     """
     print("--------------------\nStarting execution...\n--------------------")
-    run_pipeline(system="final", n = 5)
+    run_pipeline(system="final", n = 3)
     print("--------------------\nExecution Complete.")
 
 if __name__ == "__main__":

@@ -81,18 +81,20 @@ def run_pipeline(system, n):
         # ------------------------------------------
         # 5) Iterate over pieces of each composer
         # ------------------------------------------
+
         for piece in pieces:
             # ------------------------------------------
             # Load piece, build features
             # ------------------------------------------
             df = load_tsv(piece.path)
             score = piece.score # score name
+            # if score != "BWV1010_06_BourreeII":
+            #     continue
             features = [
                 add_proper_empty_last_row,
                 drop_unnecessary_columns,
                 convert_frac_cols_to_float,
                 add_root_prog, 
-                add_root_progression_type_simple, 
                 add_annotation_duration,
                 add_prog_weight,
                 add_bigram_prog_weight
@@ -101,8 +103,17 @@ def run_pipeline(system, n):
                 features.append(uri_system_filter)
             for f in features:
                 df = f(df) # Add all of the features listed above
+            # df = add_n_gram(df,1)
+            # df = add_n_gram_weighed(df,1)
             df = add_n_gram(df,n)
             df = add_n_gram_weighed(df,n)
+            # df = add_n_gram(df,3)
+            # df = add_n_gram_weighed(df,3)
+            # df = add_n_gram(df,4)
+            # df = add_n_gram_weighed(df,4)
+            # df = add_n_gram(df,5)
+            # df = add_n_gram_weighed(df,5)
+
             n_gram_counter.update(df[f"{n}-gram_progs"])
             # ------------------------------------------
             # Collect info from each piece - all progs, weights
@@ -168,15 +179,22 @@ def run_pipeline(system, n):
         # ------------------------------------------
         # END OF COMPOSERS LOOP
         # ------------------------------------------
+    # ---------------------------------
+    # Printing n-grams
+    # ---------------------------------
     text = open("n-grams.txt", 'w')
     print(list(n_gram_dict.keys()))
     for key,item in n_gram_dict.items():
         print(f"{key} number of n-progs: {len(item)}")
-        text.write(f"{key}\n{item} ")
+        text.write(f"{key}\n")
+        print(item)
+        for prog,count in item.most_common():
+            text.write(f"{prog}:{count}\n")
+        text.write(f"\n{'-'*60}\n\n")
     print("Created n-grams.txt")
     all_n_grams = n_gram_dict["All"]
     top_100 = all_n_grams.most_common(100)
-    print(top_100)
+
     # ---------------------------------
     # Plotting all prog unigrams
     # ---------------------------------

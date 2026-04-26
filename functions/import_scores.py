@@ -86,7 +86,7 @@ def build_piece_paths_list(scores_root: Path) -> list[PieceRecord]:
         reviewed_dir = repo_dir / "reviewed"
         repo = repo_dir.name
         composer = infer_composer(repo)
-        # allowed_composers = ["Bach", "Mozart"]
+        # allowed_composers = ["Bach", "Corelli", "Beethoven"]
         # if composer in allowed_composers:
         for tsv_path in sorted(reviewed_dir.glob("*.tsv")):
             score = score_name_from_path(tsv_path)
