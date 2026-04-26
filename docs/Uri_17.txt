@@ -1,0 +1,5 @@
+sanity check: take a short bach piece, do n=1,2,3,4,5.
+Then look at the score and confirm the calculations
+
+print out the progressions with \n built in, for corelli bach and beethoven and for all.
+In separate files.
