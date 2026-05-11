@@ -1,7 +1,7 @@
 # functions/per_piece_functions.py
 import pandas as pd
 import numpy as np
-from collections import Counter
+from collections import Counter, defaultdict
 from config import UNNECESSARY_COLS
 from functions.utilities import classify_movement_SAWI, frac_to_float
 
@@ -51,15 +51,29 @@ def add_n_gram(df, n):
 
 def add_n_gram_weighed(df, n):
     col_name = f"{n}-gram_weight"
-    
+
     df[col_name] = [
         df["prog_weight"].iloc[i-n+1:i+1].sum()
         if i >= n-1 and not df["prog_weight"].iloc[i-n+1:i+1].isna().any()
         else None
         for i in range(len(df))
     ]
-    
+
     return df
+
+def get_weighted_ngrams(df, n):
+    gram_col = f"{n}-gram_progs"
+    weight_col = f"{n}-gram_weight"
+    valid = df[[gram_col, weight_col]].dropna()
+    result = defaultdict(float)
+    if valid.empty:
+        return result
+    w_min = valid[weight_col].min()
+    w_max = valid[weight_col].max()
+    denom = (w_max - w_min) if w_max > w_min else 1.0
+    for gram, weight in zip(valid[gram_col], valid[weight_col]):
+        result[gram] += (weight - w_min) / denom
+    return result
 
 def uri_system_filter(df):
     df = df[df["root"] != df["root"].shift(1)]
@@ -74,47 +88,6 @@ def add_proper_empty_last_row(df):
     df = pd.concat([df, special_row], ignore_index=True)
 
     return df
-
-# ----------------------
-# SIMPLE PROGRESSIONS
-# ----------------------
-
-def simple_prog_transition_counts(df, categories, col="progression_type_simple"):
-    """
-        Return a |cats| x |cats| DataFrame of transition COUNTS:
-        rows = current, cols = next.
-    """
-    prog_type = df[col]
-    cur = prog_type
-    nxt = prog_type.shift(-1)
-
-    # keep only transitions where both sides are valid categories
-    mask = cur.isin(categories) & nxt.isin(categories)
-    cur = cur[mask]
-    nxt = nxt[mask]
-
-    mat = pd.crosstab(cur, nxt)
-
-    # force exact grid + order
-    mat = mat.reindex(index=list(categories), columns=list(categories), fill_value=0).astype(int)
-    return mat
-
-def build_simple_progression_count_per_piece(tsv_path, df, composer, labels):
-    """
-        Returns 1 table: raw counts per piece.
-        rows: pieces
-        cols: composer, piece, n,A,S,W,I
-    """
-    counts = (
-        df["progression_type_simple"]
-        .value_counts()
-        .reindex(labels, fill_value=0)
-        .astype(int)
-    )
-    if tsv_path != None:
-        counts.name = tsv_path.stem
-    row = {"composer": composer, "piece": tsv_path.stem, "n": int(counts.sum()), **counts.to_dict()}
-    return row
 
 # ----------------------
 # WEIGHTED PROGRESSIONS
