@@ -76,52 +76,6 @@ def composer_percentages_from_prog_counts(piece_counts_df, categories) -> pd.Dat
     # keep n so you know how much data each composer had
     return pct[["n"] + list(categories)]
 
-def simple_prog_transition_per_piece(df, score, categories) -> pd.Series:
-    """
-        Returns unconditional transition percentages for ONE piece over the selected categories.
-        Output is a flattened Series with index like 'S->A', 'A->W', etc.
-        Values sum to 1 across all included transitions (unless total is 0).
-    """
-    def count_prog_type_per_composer(df, categories):
-        """
-            Compute total counts of each category
-            returns a table like:
-            progression_type_simple     S     A     W     I
-            progression_type_simple
-            S                        3739  1685  1058  1510
-            A                        1597  1422   531   810
-            W                        1005   653   135   347
-            I                        1709   578   380   777
-        """
-        prog_strength = df["progression_type_simple"]
-
-        # Count transitions using crosstab: current vs next
-        shifted = prog_strength.shift(-1)
-        all_transitions = pd.crosstab(prog_strength, shifted)
-
-        # Keep only the categories of interest (S, A, W,...)
-        cats = list(categories)
-        transition_counts = (
-            all_transitions
-            .reindex(index=cats, columns=cats, fill_value=0)
-            .astype(int)
-        )
-        return transition_counts
-    transition_counts = count_prog_type_per_composer(df, categories=categories)
-
-    total = transition_counts.to_numpy().sum()
-    if total == 0:
-        # return all zeros with consistent index
-        idx = [f"{i}->{j}" for i in transition_counts.index for j in transition_counts.columns]
-        return pd.Series(0.0, index=idx, name=str(score))
-
-    uncond = transition_counts / total
-    # flatten
-    out = uncond.stack()
-    out.index = [f"{i}->{j}" for (i, j) in out.index]
-    out.name = str(score)
-    return out
-
 # ----------------------
 # WEIGHTED PROGRESSIONS
 # ----------------------

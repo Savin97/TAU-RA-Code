@@ -7,28 +7,26 @@
     Calculate uncond probabilties.
     Create graphs and csv tables.
 """
+import itertools
 import pandas as pd
 from pathlib import Path
 from collections import defaultdict, Counter
 from functions.per_piece_functions import (
-    add_annotation_duration, 
+    add_annotation_duration,
     add_n_gram,
     add_n_gram_weighed,
-    add_bigram_prog_weight, 
-    add_prog_weight, 
-    add_root_prog, 
+    get_weighted_ngrams,
+    add_bigram_prog_weight,
+    add_prog_weight,
+    add_root_prog,
     add_root_progression_type_simple,
-    convert_frac_cols_to_float, 
-    drop_unnecessary_columns, 
+    convert_frac_cols_to_float,
+    drop_unnecessary_columns,
     uri_system_filter,
     add_proper_empty_last_row,
-    simple_prog_transition_counts,
-    build_simple_progression_count_per_piece,
-    count_weighted_root_progs,
-    count_n_gram_weighted_root_progs)
+    count_weighted_root_progs)
 from functions.per_composer_functions import (
     composer_percentages_from_prog_counts,
-    simple_prog_transition_per_piece,
     build_all_progs_weighted_matrix)
 from functions.my_functions import (
     aggregate_prog_transition_unconditional,
@@ -65,7 +63,8 @@ def run_pipeline(system, n):
     # ------------------------------------------
     all_progs_counter = []
     n_gram_dict = {}
-    n_gram_weighed_dict = {}
+    n_gram_weighted_dict = {}
+    global_root_prog_vals = set()
     # ------------------------------------------
     # 4) Iterate over composers
     # ------------------------------------------
@@ -80,8 +79,8 @@ def run_pipeline(system, n):
         all_progs_unigram_counts = Counter() # unigram
         all_progs_bigram_weighted_counts = Counter() # bigram, weighted
         n_gram_counter = Counter()
-        n_gram_weighted_counter = Counter()
-        root_prog_set = set() # set of all root_prog values per composer
+        n_gram_weighted_counter = defaultdict(float)
+        composer_root_prog_set = set() # set of all root_prog values per composer
         # ------------------------------------------
         # 5) Iterate over pieces of each composer
         # ------------------------------------------
@@ -92,8 +91,6 @@ def run_pipeline(system, n):
             # ------------------------------------------
             df = load_tsv(piece.path)
             score = piece.score # score name
-            # if score != "BWV1010_06_BourreeII":
-            #     continue
             features = [
                 add_proper_empty_last_row,
                 drop_unnecessary_columns,
@@ -107,25 +104,20 @@ def run_pipeline(system, n):
                 features.append(uri_system_filter)
             for f in features:
                 df = f(df) # Add all of the features listed above
-            # df = add_n_gram(df,1)
-            # df = add_n_gram_weighed(df,1)
             df = add_n_gram(df,n)
             df = add_n_gram_weighed(df,n)
-            # df = add_n_gram(df,3)
-            # df = add_n_gram_weighed(df,3)
-            # df = add_n_gram(df,4)
-            # df = add_n_gram_weighed(df,4)
-            # df = add_n_gram(df,5)
-            # df = add_n_gram_weighed(df,5)
 
             n_gram_counter.update(df[f"{n}-gram_progs"])
+            piece_weighted = get_weighted_ngrams(df, n)
+            for gram, w in piece_weighted.items():
+                n_gram_weighted_counter[gram] += w
             # ------------------------------------------
             # Collect info from each piece - all progs, weights
             # ------------------------------------------
             # Update unique set of root_prog
-
-            root_prog_set.update(df["root_prog"].dropna().astype(int).tolist())
-
+            piece_root_prog_vals = df["root_prog"].dropna().astype(int).tolist()
+            composer_root_prog_set.update(piece_root_prog_vals)
+            global_root_prog_vals.update(piece_root_prog_vals)
             # ------------------------------------------
             # All progs
             # ------------------------------------------
@@ -163,7 +155,7 @@ def run_pipeline(system, n):
             all_progs_counter.append(tmp_row)
                                           
         # TABLE OF WEIGHTED DIFFERENCES OF ALL ROOT PROGS 
-        root_prog_list = sorted(list(root_prog_set))
+        composer_root_prog_list = sorted(list(composer_root_prog_set))
         composer_root_prog_weight_unigram_df = (
             pd.Series(composer_root_prog_weight, name="prog_weight_sum")
             .sort_index()
@@ -173,9 +165,10 @@ def run_pipeline(system, n):
         
         # n-grams
         n_gram_dict[composer] = n_gram_counter
-        n_gram_weighed_dict[composer] = n_gram_weighted_counter
+        n_gram_weighted_dict[composer] = dict(n_gram_weighted_counter)
+
         # ALL PROGRESSION PROBS
-        all_progs_weighted_matrix = build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_prog_list)
+        all_progs_weighted_matrix = build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,composer_root_prog_list)
         
         # Outputs:
         # CSVs
@@ -183,43 +176,44 @@ def run_pipeline(system, n):
             (composer_root_prog_weight_unigram_df, "composer_root_prog_weight_unigram_df")
             ]:
             make_csv(df, f"{composer}_{name}",system = system, path_modifier="composer") 
-
         # Graphs
-        plot_heatmap(system=system, composer=composer, graph_title = "Weighted Progs", filename=f"{composer}_ALL_WEIGHTED_{system}", transition_matrix=all_progs_weighted_matrix, categories=root_prog_list) 
+        plot_heatmap(system=system, composer=composer, graph_title = "Weighted Progs", filename=f"{composer}_ALL_WEIGHTED_{system}", transition_matrix=all_progs_weighted_matrix, categories=composer_root_prog_list) 
         # ------------------------------------------
         # END OF COMPOSERS LOOP
         # ------------------------------------------
-    print("set", root_prog_set)
-    print(len(root_prog_set))
+
     # ---------------------------------
     # Printing n-grams
     # ---------------------------------
-    # text = open("n-grams.txt", 'w')
-    # print(list(n_gram_dict.keys()))
-    # for key,item in n_gram_dict.items():
-    #     print(f"{key} number of n-progs: {len(item)}")
-    #     text.write(f"{key}\n")
-    #     print(item)
-    #     for prog,count in item.most_common():
-    #         text.write(f"{prog}: {count}\n")
-    #     text.write(f"\n{'-'*60}\n\n")
-    # print("Created n-grams.txt")
-    # all_n_grams = n_gram_dict["All"]
-    # top_100 = all_n_grams.most_common(100)
-
-    text = open(f"{n}-grams_weighed.txt", 'w')
-    print(list(n_gram_weighed_dict.keys()))
-    for key,item in n_gram_weighed_dict.items():
-        print(f"{key} number of n-progs: {len(item)}")
+    text = open("output/n-grams.txt", 'w')
+    for key,item in n_gram_dict.items():
+        # print(f"{key} number of n-progs: {len(item)}")
         text.write(f"{key}\n")
-        print(item)
-        for prog,weight in item.most_common():
-            text.write(f"{prog}: {weight}\n")
+        for prog,count in item.most_common():
+            text.write(f"{prog}:{count}\n")
         text.write(f"\n{'-'*60}\n\n")
     print(f"Created {n}-grams_weighed.txt")
     all_n_grams = n_gram_weighed_dict["All"]
     top_100 = all_n_grams.most_common(100)
 
+
+    # ---------------------------------
+    # Weighted n-grams output
+    # ---------------------------------
+    rp_min = min(global_root_prog_vals)
+    rp_max = max(global_root_prog_vals)
+    all_keys = list(itertools.product(range(rp_min, rp_max + 1), repeat=n))
+    weighted_dir = Path("output/n-grams-weighted")
+    weighted_dir.mkdir(exist_ok=True)
+    for composer, weighted_counts in n_gram_weighted_dict.items():
+        values = [weighted_counts.get(k, 0.0) for k in all_keys]
+        v_min, v_max = min(values), max(values)
+        denom = (v_max - v_min) if v_max > v_min else 1.0
+        normalized = [round((v - v_min) / denom, 3) for v in values]
+        pd.DataFrame({"vector": all_keys, "weight": normalized}).to_csv(
+            weighted_dir / f"{composer}.csv", index=False
+        )
+    print(f"Created weighted n-gram CSV files in '{weighted_dir}/'.")
 
     # ---------------------------------
     # Plotting all prog unigrams
