@@ -93,7 +93,7 @@ def add_proper_empty_last_row(df):
 # WEIGHTED PROGRESSIONS
 # ----------------------
 
-def count_weighted_root_progs(df, n):
+def count_weighted_root_progs(df):
     # Keep alignment across columns, coerce bad values to NaN
     root_prog = pd.to_numeric(df["root_prog"], errors="coerce")
     prog_weight = pd.to_numeric(df["bigram_prog_weight"], errors="coerce")
@@ -112,49 +112,3 @@ def count_weighted_root_progs(df, n):
     sums = np.bincount(inv, weights=weights)
 
     return Counter({(int(a), int(b)): float(s) for (a, b), s in zip(uniq, sums)})
-
-def count_n_gram_weighted_root_progs(df, n):
-    ngram_col = f"{n}-gram_progs"
-    weight_col = f"{n}-gram_weight"
-
-    if ngram_col not in df.columns:
-        df = add_n_gram(df, n)
-
-    if weight_col not in df.columns:
-        df = add_n_gram_weighed(df, n)
-
-    weights = pd.to_numeric(df[weight_col], errors="coerce")
-
-    mask = df[ngram_col].notna() & weights.notna()
-
-    if not mask.any():
-        return Counter()
-
-    counter = Counter()
-
-    for ngram, weight in zip(df.loc[mask, ngram_col], weights.loc[mask]):
-        counter[tuple(int(v) for v in ngram)] += float(weight)
-
-    return counter
-
-
-def add_n_gram(df, n):
-    col_name = f"{n}-gram_progs"
-    df[col_name] = [
-        tuple(int(v) for v in window) if i >= n-1 and not window.isna().any() else None
-        for i in range(len(df))
-        for window in [df["root_prog"].iloc[i-n+1:i+1]]
-    ]
-    return df
-
-def count_weighted_n_grams(df, n):
-    col_name = f"{n}-gram_weight"
-    
-    df[col_name] = [
-        df["prog_weight"].iloc[i-n+1:i+1].sum()
-        if i >= n-1 and not df["prog_weight"].iloc[i-n+1:i+1].isna().any()
-        else None
-        for i in range(len(df))
-    ]
-    
-    return df

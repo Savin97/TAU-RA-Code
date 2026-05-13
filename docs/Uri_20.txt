@@ -1,0 +1,1 @@
+1. Make CSVs per piece, with composer_scorename.csv as its name for all 1284 scores.
