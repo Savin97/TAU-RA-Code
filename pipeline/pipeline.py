@@ -24,7 +24,8 @@ from functions.per_piece_functions import (
     add_proper_empty_last_row,
     simple_prog_transition_counts,
     build_simple_progression_count_per_piece,
-    count_weighted_root_progs)
+    count_weighted_root_progs,
+    count_n_gram_weighted_root_progs)
 from functions.per_composer_functions import (
     composer_percentages_from_prog_counts,
     simple_prog_transition_per_piece,
@@ -64,9 +65,11 @@ def run_pipeline(system, n):
     # ------------------------------------------
     all_progs_counter = []
     n_gram_dict = {}
+    n_gram_weighed_dict = {}
     # ------------------------------------------
     # 4) Iterate over composers
     # ------------------------------------------
+    # root_prog_set = set()
     for composer, pieces in pieces_grouped_by_composer.items():
         # ------------------------------------------
         # 5) Initialize per-composer collectors
@@ -77,6 +80,7 @@ def run_pipeline(system, n):
         all_progs_unigram_counts = Counter() # unigram
         all_progs_bigram_weighted_counts = Counter() # bigram, weighted
         n_gram_counter = Counter()
+        n_gram_weighted_counter = Counter()
         root_prog_set = set() # set of all root_prog values per composer
         # ------------------------------------------
         # 5) Iterate over pieces of each composer
@@ -119,12 +123,15 @@ def run_pipeline(system, n):
             # Collect info from each piece - all progs, weights
             # ------------------------------------------
             # Update unique set of root_prog
+
             root_prog_set.update(df["root_prog"].dropna().astype(int).tolist())
+
             # ------------------------------------------
             # All progs
             # ------------------------------------------
             all_progs_unigram_counts.update(all_root_prog_counts(df)) 
-            all_progs_bigram_weighted_counts.update(count_weighted_root_progs(df)) # Weighted
+            all_progs_bigram_weighted_counts.update(count_weighted_root_progs(df, 2)) # Weighted
+            n_gram_weighted_counter.update(count_n_gram_weighted_root_progs(df, n)) # Weighted
             # ------------------------------------------
             # Sum up weights of root progressions
             # ------------------------------------------
@@ -137,9 +144,12 @@ def run_pipeline(system, n):
             # Assign weight to dict holder
             for root_prog, wsum in piece_prog_weight_sum.items():
                 composer_root_prog_weight[ int(root_prog) ] += float(wsum) # type: ignore
+
+
             # ------------------------------------------
             # END OF PIECES LOOP
             # ------------------------------------------
+        continue
         # ------------------------------------------
         # DF with composer's year
         # ------------------------------------------
@@ -160,10 +170,10 @@ def run_pipeline(system, n):
             .reset_index()
             .rename(columns={"index": "root_prog"})
         )
-
+        
         # n-grams
         n_gram_dict[composer] = n_gram_counter
-
+        n_gram_weighed_dict[composer] = n_gram_weighted_counter
         # ALL PROGRESSION PROBS
         all_progs_weighted_matrix = build_all_progs_weighted_matrix(all_progs_bigram_weighted_counts,root_prog_list)
         
@@ -179,21 +189,37 @@ def run_pipeline(system, n):
         # ------------------------------------------
         # END OF COMPOSERS LOOP
         # ------------------------------------------
+    print("set", root_prog_set)
+    print(len(root_prog_set))
     # ---------------------------------
     # Printing n-grams
     # ---------------------------------
-    text = open("n-grams.txt", 'w')
-    print(list(n_gram_dict.keys()))
-    for key,item in n_gram_dict.items():
+    # text = open("n-grams.txt", 'w')
+    # print(list(n_gram_dict.keys()))
+    # for key,item in n_gram_dict.items():
+    #     print(f"{key} number of n-progs: {len(item)}")
+    #     text.write(f"{key}\n")
+    #     print(item)
+    #     for prog,count in item.most_common():
+    #         text.write(f"{prog}: {count}\n")
+    #     text.write(f"\n{'-'*60}\n\n")
+    # print("Created n-grams.txt")
+    # all_n_grams = n_gram_dict["All"]
+    # top_100 = all_n_grams.most_common(100)
+
+    text = open(f"{n}-grams_weighed.txt", 'w')
+    print(list(n_gram_weighed_dict.keys()))
+    for key,item in n_gram_weighed_dict.items():
         print(f"{key} number of n-progs: {len(item)}")
         text.write(f"{key}\n")
         print(item)
-        for prog,count in item.most_common():
-            text.write(f"{prog}:{count}\n")
+        for prog,weight in item.most_common():
+            text.write(f"{prog}: {weight}\n")
         text.write(f"\n{'-'*60}\n\n")
-    print("Created n-grams.txt")
-    all_n_grams = n_gram_dict["All"]
+    print(f"Created {n}-grams_weighed.txt")
+    all_n_grams = n_gram_weighed_dict["All"]
     top_100 = all_n_grams.most_common(100)
+
 
     # ---------------------------------
     # Plotting all prog unigrams

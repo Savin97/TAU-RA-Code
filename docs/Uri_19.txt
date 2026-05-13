@@ -1,0 +1,2 @@
+1. Normalize per piece
+2. Build vectors of all possible root prog vectors (from (-12,-12,-12) to (12,12,12) or whatever)

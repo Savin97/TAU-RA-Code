@@ -1,0 +1,4 @@
+1. when you get (-1,1,-1) or (1,-1,1) check the labels - the assumption is that they'll be mostly tonic-dominant.
+2. Check how many (pct) of root progs overlap (meaning how many get counted severl times, like in (-1,1,-1) and (1,-1,-1) )
+3. make n-grams for n=4 and 5 the same way as before - bach, beethoven, corelli and all.
+4. Make the value the weight sum insead of sum of counts
