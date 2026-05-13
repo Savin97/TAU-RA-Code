@@ -65,6 +65,8 @@ def run_pipeline(system, n):
     n_gram_dict = {}
     n_gram_weighted_dict = {}
     global_root_prog_vals = set()
+    pieces_weighted_dir = Path("output/n_grams_weighted_pieces")
+    pieces_weighted_dir.mkdir(parents=True, exist_ok=True)
     # ------------------------------------------
     # 4) Iterate over composers
     # ------------------------------------------
@@ -110,6 +112,21 @@ def run_pipeline(system, n):
             piece_weighted = get_weighted_ngrams(df, n)
             for gram, w in piece_weighted.items():
                 n_gram_weighted_counter[gram] += w
+            
+            #------------------------------------    
+            # Write per-piece weighted n-gram CSV
+            #------------------------------------    
+            if composer != "All" and piece_weighted:
+                rp_vals = df["root_prog"].dropna().astype(int)
+                rp_min, rp_max = int(rp_vals.min()), int(rp_vals.max())
+                all_keys = list(itertools.product(range(rp_min, rp_max + 1), repeat=n))
+                pw_values = [piece_weighted.get(k, 0.0) for k in all_keys]
+                pw_min, pw_max = min(pw_values), max(pw_values)
+                pw_denom = (pw_max - pw_min) if pw_max > pw_min else 1.0
+                pd.DataFrame({
+                    "vector": all_keys,
+                    "weight": [round((v - pw_min) / pw_denom, 3) for v in pw_values]
+                }).to_csv(pieces_weighted_dir / f"{composer}_{score}.csv", index=False)
             # ------------------------------------------
             # Collect info from each piece - all progs, weights
             # ------------------------------------------
@@ -137,10 +154,11 @@ def run_pipeline(system, n):
             # ------------------------------------------
             # END OF PIECES LOOP
             # ------------------------------------------
-        # ------------------------------------------
-        # DF with composer's year
-        # ------------------------------------------
+        
         if composer != "All": # Avoid counting "All" as a composer
+            # ------------------------------------------
+            # DF with composer's year
+            # ------------------------------------------
             tmp_row = {
                 "composer": composer,
                 "composer_mid_year": composer_mid_life_dates[composer],
@@ -148,6 +166,8 @@ def run_pipeline(system, n):
             # add progression counts as columns
             tmp_row.update(all_progs_unigram_counts)
             all_progs_counter.append(tmp_row)
+
+            
                                           
         # TABLE OF WEIGHTED DIFFERENCES OF ALL ROOT PROGS 
         composer_root_prog_list = sorted(list(composer_root_prog_set))
@@ -183,7 +203,7 @@ def run_pipeline(system, n):
     rp_min = min(global_root_prog_vals)
     rp_max = max(global_root_prog_vals)
     all_keys = list(itertools.product(range(rp_min, rp_max + 1), repeat=n))
-    weighted_dir = Path("output/n-grams-weighted")
+    weighted_dir = Path("output/n_grams_weighted")
     weighted_dir.mkdir(exist_ok=True)
     for composer, weighted_counts in n_gram_weighted_dict.items():
         values = [weighted_counts.get(k, 0.0) for k in all_keys]
