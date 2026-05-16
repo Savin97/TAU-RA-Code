@@ -119,14 +119,17 @@ def run_pipeline(system, n):
             if composer != "All" and piece_weighted:
                 rp_vals = df["root_prog"].dropna().astype(int)
                 rp_min, rp_max = int(rp_vals.min()), int(rp_vals.max())
+
                 all_keys = list(itertools.product(range(rp_min, rp_max + 1), repeat=n))
                 pw_values = [piece_weighted.get(k, 0.0) for k in all_keys]
-                pw_min, pw_max = min(pw_values), max(pw_values)
-                pw_denom = (pw_max - pw_min) if pw_max > pw_min else 1.0
+
                 pd.DataFrame({
                     "vector": all_keys,
-                    "weight": [round((v - pw_min) / pw_denom, 3) for v in pw_values]
-                }).to_csv(pieces_weighted_dir / f"{composer}_{score}.csv", index=False)
+                    "weight": [round(v, 3) for v in pw_values]
+                }).to_csv(
+                    pieces_weighted_dir / f"{composer}_{score}.csv",
+                    index=False
+                )
             # ------------------------------------------
             # Collect info from each piece - all progs, weights
             # ------------------------------------------
@@ -207,11 +210,12 @@ def run_pipeline(system, n):
     weighted_dir.mkdir(exist_ok=True)
     for composer, weighted_counts in n_gram_weighted_dict.items():
         values = [weighted_counts.get(k, 0.0) for k in all_keys]
-        v_min, v_max = min(values), max(values)
-        denom = (v_max - v_min) if v_max > v_min else 1.0
-        normalized = [round((v - v_min) / denom, 3) for v in values]
-        pd.DataFrame({"vector": all_keys, "weight": normalized}).to_csv(
-            weighted_dir / f"{composer}.csv", index=False
+        pd.DataFrame({
+            "vector": all_keys,
+            "weight": [round(v, 3) for v in values]
+        }).to_csv(
+            weighted_dir / f"{composer}.csv",
+            index=False
         )
     print(f"Created weighted n-gram CSV files in '{weighted_dir}/'.")
 
