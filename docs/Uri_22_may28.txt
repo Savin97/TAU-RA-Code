@@ -1,0 +1,7 @@
+1. Reduction to 2D in trigrams, quadrograms.
+2. Create Dendrograms should compare pieces, not composers. All vectors should be included, even if they show up 0 times. They should be distance between vectors (shannon or somethine else).
+3. make 1284 vectors on a per-piece level, where some will be small vectors(unigrams), some quadrograms, some bigrams and trigrams.
+4. 2D visualization per n-level (so 8 total), coloring once by composer, once by epochs.
+5. Can the clustering dendogram work directly on the vectors, or does it need a distance-between-vectors table?
+6. Check Martin's email, GMM on a 4-10 level. Should we do GMM clustering?
+

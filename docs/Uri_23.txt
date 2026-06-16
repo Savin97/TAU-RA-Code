@@ -1,0 +1,5 @@
+1. Explore whether root progressions can work as part of compressions - evaluate by how effective and costly that compression is.
+Showing that given a piece X, with analysis Y, root progression representation Z offers some degree of compression of Y.
+2. Improve the pipeline so it runs for n=4 without running out of RAM.
+3. Create zips for n=1 to n=4, each consisting of CSVs of the vectors and their weights.
+- Assess how each next level adds to improving analysis.

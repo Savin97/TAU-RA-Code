@@ -1,0 +1,4 @@
+1. Create cloud folder for all exploratory project outputs.
+2. Try out visualizations, use uri's mail for refernce (the friday one with martin)
+3. run the pipeline for n=2,n=4
+

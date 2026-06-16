@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import numpy as np
+import zipfile
 from fractions import Fraction
 
 from config import (ROOT_PATH,
@@ -47,6 +48,28 @@ def pick_categories_based_on_system_type(system):
         raise ValueError ("Invalid Pipeline System")
     return simple_categories
 
+
+
+def create_output_zip(n, system):
+    zip_dir = Path("output/zips")
+    zip_dir.mkdir(parents=True, exist_ok=True)
+    zip_path = zip_dir / f"n{n}_{system}_vectors.zip"
+
+    composer_dir = Path(f"output/{system}/n{n}/n_grams_weighted")
+    piece_dir = Path(f"output/{system}/n{n}/n_grams_weighted_pieces")
+    piece_vec = Path(f"output/{system}/n{n}/piece_vectors_n{n}.csv")
+
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        if composer_dir.exists():
+            for f in sorted(composer_dir.glob("*.csv")):
+                zf.write(f, f"n{n}/composer_weighted/{f.name}")
+        if piece_dir.exists():
+            for f in sorted(piece_dir.glob("*.csv")):
+                zf.write(f, f"n{n}/piece_weighted/{f.name}")
+        if piece_vec.exists():
+            zf.write(piece_vec, f"n{n}/piece_vectors_n{n}.csv")
+
+    print(f"ZIP created: {zip_path}  ({zip_path.stat().st_size // 1024:,} KB)")
 
 def create_composer_file_lists(repos):
     ROOT = Path(ROOT_PATH)

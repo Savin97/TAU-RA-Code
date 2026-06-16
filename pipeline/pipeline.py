@@ -64,7 +64,7 @@ def run_pipeline(system, n):
         n_gram_counter = Counter()
         n_gram_weighted_counter = defaultdict(float)
         # ------------------------------------------
-        # 5) Iterate over pieces of each composer
+        # 6) Iterate over pieces of each composer
         # ------------------------------------------
 
         for piece in pieces:
@@ -76,7 +76,7 @@ def run_pipeline(system, n):
             features = [
                 add_proper_empty_last_row,
                 drop_unnecessary_columns,
-                add_root_prog, 
+                add_root_prog,
                 convert_frac_cols_to_float,
                 add_annotation_duration,
                 add_prog_weight,
@@ -90,7 +90,7 @@ def run_pipeline(system, n):
                 if f.__name__ == "add_n_gram" or f.__name__ == "add_n_gram_weighed":
                     df = f(df,n)
                 else:
-                    df = f(df) 
+                    df = f(df)
             # ------------------------------------------
             # Collect info from each piece - all progs, weights
             # ------------------------------------------
@@ -98,15 +98,15 @@ def run_pipeline(system, n):
             piece_root_prog_vals = df["root_prog"].dropna().astype(int).tolist()
             global_root_prog_vals.update(piece_root_prog_vals)
             all_progs_bigram_weighted_counts.update(count_weighted_root_progs(df)) # Weighted
-            
+
             n_gram_counter.update(df[f"{n}-gram_progs"])
             piece_weighted = get_weighted_ngrams(df, n)
             for gram, w in piece_weighted.items():
                 n_gram_weighted_counter[gram] += w
 
-            #------------------------------------    
+            #------------------------------------
             # Write per-piece weighted n-gram CSV
-            #------------------------------------    
+            #------------------------------------
             if composer != "All" and piece_weighted:
                 rp_vals = df["root_prog"].dropna().astype(int)
                 rp_min, rp_max = int(rp_vals.min()), int(rp_vals.max())
@@ -127,7 +127,7 @@ def run_pipeline(system, n):
 
         # ------------------------------------------
         # COMPOSERS LOOP
-        # ------------------------------------------                               
+        # ------------------------------------------
         # n-grams
         n_gram_dict[composer] = n_gram_counter
         n_gram_weighted_dict[composer] = dict(n_gram_weighted_counter)
@@ -141,7 +141,7 @@ def run_pipeline(system, n):
     rp_min = min(global_root_prog_vals)
     rp_max = max(global_root_prog_vals)
     all_keys = list(itertools.product(range(rp_min, rp_max + 1), repeat=n))
-    weighted_dir = Path("output/n_grams_weighted")
+    weighted_dir = Path(f"output/{system}/n{n}/n_grams_weighted")
     weighted_dir.mkdir(exist_ok=True)
     for composer, weighted_counts in n_gram_weighted_dict.items():
         values = [weighted_counts.get(k, 0.0) for k in all_keys]
