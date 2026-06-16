@@ -1,6 +1,7 @@
 #main.py
 from pipeline.pipeline import run_pipeline
 
+N = [1,2]
 def main():
     """
         system param for run_pipeline:
@@ -8,7 +9,9 @@ def main():
         Choose system = "uri" to exclude them.
     """
     print("--------------------\nStarting execution...\n--------------------")
-    run_pipeline(system="final", n = 3)
+    for n in N:
+        print(f"--------------------\nn={n}\n--------------------")
+        run_pipeline(system="final", n = n)
     print("--------------------\nExecution Complete.")
 
 if __name__ == "__main__":

@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-from collections import Counter
 
 def rootdiff_bigram_prog_weight_matrix(df: pd.DataFrame):
     """

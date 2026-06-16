@@ -48,7 +48,6 @@ def pick_categories_based_on_system_type(system):
     return simple_categories
 
 
-
 def create_composer_file_lists(repos):
     ROOT = Path(ROOT_PATH)
     bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files = [], [], [], [], [], []
@@ -72,6 +71,12 @@ def create_composer_file_lists(repos):
             liszt_tsv_files = list(reviewed_dir.rglob("*_reviewed.tsv"))
     return bach_tsv_files, mozart_tsv_files, beethoven_tsv_files, chopin_tsv_files, liszt_tsv_files, all_reviewed_tsv_files
 
+def get_uncond_probs(transition_counts):
+    # Unconditional Probabilities - sums to 1 over all cells
+    total_transitions = float(np.nansum(transition_counts.to_numpy()))
+    uncond_probs = (transition_counts / total_transitions) if total_transitions else transition_counts.astype(float)
+    return uncond_probs
+
 def frac_to_float(value):
     if value is None or (isinstance(value, float) and np.isnan(value)):
         return np.nan
@@ -80,42 +85,3 @@ def frac_to_float(value):
         return np.nan
     return float(Fraction(s))  # handles "0", "3/8", "12/8", etc.
 
-def make_frac_not_show_as_date(df):
-    pass
-
-def get_SAWINONE_PROG_CATEGORIES_trimmed(global_all_prog_counts):
-    # --- TRIM USING COUNTS (not probabilities) ---
-    row_ct = global_all_prog_counts.sum(axis=1)
-    col_ct = global_all_prog_counts.sum(axis=0)
-
-    # keep states that appear at least once as a source OR a destination
-    keep = (row_ct + col_ct) > 0
-    counts_trim = global_all_prog_counts.loc[keep, keep]
-    cats_trim = counts_trim.index.tolist()
-    return cats_trim
-
-def classify_movement_SAWI(diff):
-    """
-        Gets a diff between two rows in the root column.
-        Returns a classification of the diff.
-    """
-    artificial = {-2, 2, -5, 5, 9, -9}
-    strong = {-1, -4, 6, 3, -8, 10}
-    weak = {1, 4, -6, -3, 8, -10}
-    identical = {0, -0, 7, -7}
-
-    if pd.isna(diff):
-        return np.nan
-
-    diff = int(diff)
-
-    if diff in identical:
-        return "I"
-    elif diff in artificial:
-        return "A"
-    elif diff in strong:
-        return "S"
-    elif diff in weak:
-        return "W"
-    else:
-        return "!"

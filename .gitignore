@@ -7,3 +7,4 @@ output/
 **output/
 .venv/
 docs/Papers/
+old_output*

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Memory
+
+Session notes, task status, and ongoing context are stored in `.claude/memory/`. Read `.claude/memory/MEMORY.md` for the index at the start of each session.
+
 ## What this project does
 
 This is a music theory research tool (Tel Aviv University) that analyzes harmonic root progressions across a corpus of classical music scores. It ingests reviewed TSV annotation files (one per piece), computes root-progression statistics, and outputs heatmaps and stacked-bar charts along with CSV summary tables.

@@ -3,10 +3,14 @@ import pandas as pd
 import numpy as np
 from collections import Counter, defaultdict
 from config import UNNECESSARY_COLS
-from functions.utilities import classify_movement_SAWI, frac_to_float
+from functions.utilities import frac_to_float
 
 def drop_unnecessary_columns(df):
     return df.drop(columns=UNNECESSARY_COLS, errors="ignore")
+
+def add_root_prog(df):
+    df["root_prog"] = df["root"].diff()
+    return df
 
 def convert_frac_cols_to_float(df):
     frac_cols = ["mc_onset", "mn_onset", "timesig"]
@@ -14,14 +18,6 @@ def convert_frac_cols_to_float(df):
     for i in range(len(frac_cols)):
         if frac_cols[i] in df.columns:
             df[frac_cols_numeric[i]] = df[frac_cols[i]].apply(frac_to_float)
-    return df
-
-def add_root_prog(df):
-    df["root_prog"] = df["root"].diff()
-    return df
-
-def add_root_progression_type_simple(df):
-    df["progression_type_simple"] = df["root_prog"].apply(classify_movement_SAWI)
     return df
 
 def add_annotation_duration(df):
